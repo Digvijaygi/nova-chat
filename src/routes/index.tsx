@@ -335,4 +335,3 @@ function Welcome({ onPick }: { onPick: (t: string) => void }) {
     </div>
   );
 }
-}
