@@ -4,6 +4,8 @@ export interface StreamOptions {
   messages: Array<{ role: "user" | "assistant"; content: string }>;
   model: string;
   mode: string;
+  temperature?: number;
+  customSystem?: string;
   signal?: AbortSignal;
   onDelta: (chunk: string) => void;
 }
@@ -16,6 +18,8 @@ export async function streamChat(opts: StreamOptions) {
       messages: opts.messages,
       model: opts.model,
       mode: opts.mode,
+      temperature: opts.temperature,
+      customSystem: opts.customSystem,
     }),
     signal: opts.signal,
   });

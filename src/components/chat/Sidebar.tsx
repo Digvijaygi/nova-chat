@@ -1,5 +1,7 @@
-import { MessageSquarePlus, Trash2, Settings, Sparkles, X } from "lucide-react";
+import { MessageSquarePlus, Trash2, Settings, Sparkles, X, Pin, PinOff, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { Conversation } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +14,7 @@ interface Props {
   onOpenSettings: () => void;
   open: boolean;
   onClose: () => void;
+  onTogglePin?: (id: string) => void;
 }
 
 export function Sidebar({
@@ -23,7 +26,21 @@ export function Sidebar({
   onOpenSettings,
   open,
   onClose,
+  onTogglePin,
 }: Props) {
+  const [q, setQ] = useState("");
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    let list = conversations;
+    if (term) {
+      list = list.filter((c) =>
+        c.title.toLowerCase().includes(term) ||
+        c.messages.some((m) => m.content.toLowerCase().includes(term)),
+      );
+    }
+    return [...list].sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned));
+  }, [conversations, q]);
+
   return (
     <>
       {open && (
@@ -64,17 +81,29 @@ export function Sidebar({
           </Button>
         </div>
 
+        <div className="px-3 pt-2">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search chats…"
+              className="h-9 rounded-xl border-border bg-secondary/40 pl-8 text-sm"
+            />
+          </div>
+        </div>
+
         <div className="mt-4 flex-1 overflow-y-auto px-2 scrollbar-thin">
           <div className="px-2 pb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            Recent
+            {q ? `Results (${filtered.length})` : "Recent"}
           </div>
-          {conversations.length === 0 && (
+          {filtered.length === 0 && (
             <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-              No chats yet
+              {q ? "No matches" : "No chats yet"}
             </div>
           )}
           <ul className="space-y-0.5">
-            {conversations.map((c) => (
+            {filtered.map((c) => (
               <li key={c.id}>
                 <button
                   onClick={() => {
@@ -88,7 +117,18 @@ export function Sidebar({
                       : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
                   )}
                 >
+                  {c.pinned && <Pin className="h-3 w-3 shrink-0 text-primary" />}
                   <span className="flex-1 truncate">{c.title || "New chat"}</span>
+                  {onTogglePin && (
+                    <span
+                      role="button"
+                      onClick={(e) => { e.stopPropagation(); onTogglePin(c.id); }}
+                      className="opacity-0 transition group-hover:opacity-100 hover:text-foreground"
+                      title={c.pinned ? "Unpin" : "Pin"}
+                    >
+                      {c.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                    </span>
+                  )}
                   <span
                     role="button"
                     onClick={(e) => {
