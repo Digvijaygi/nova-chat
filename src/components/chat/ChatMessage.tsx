@@ -2,11 +2,12 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Check, Copy, Pencil, RefreshCw, Trash2, Volume2, User, Sparkles } from "lucide-react";
+import { Check, Copy, Pencil, RefreshCw, Trash2, Volume2, User, Sparkles, ThumbsUp, ThumbsDown, Bookmark, Share2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Message } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface Props {
   message: Message;
@@ -15,6 +16,9 @@ interface Props {
   onEdit?: () => void;
   onDelete?: () => void;
   onSpeak?: (text: string) => void;
+  onReact?: (r: "up" | "down") => void;
+  onBookmark?: () => void;
+  showTimestamp?: boolean;
 }
 
 function CodeBlock({ language, value }: { language: string; value: string }) {
@@ -47,7 +51,7 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
   );
 }
 
-export function ChatMessage({ message, isStreaming, onRegenerate, onEdit, onDelete, onSpeak }: Props) {
+export function ChatMessage({ message, isStreaming, onRegenerate, onEdit, onDelete, onSpeak, onReact, onBookmark, showTimestamp }: Props) {
   const [copied, setCopied] = useState(false);
   const isUser = message.role === "user";
 
@@ -55,6 +59,15 @@ export function ChatMessage({ message, isStreaming, onRegenerate, onEdit, onDele
     await navigator.clipboard.writeText(message.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  const share = async () => {
+    const text = `${isUser ? "You" : "dksai"}: ${message.content}`;
+    if (navigator.share) {
+      try { await navigator.share({ text }); return; } catch { /* fall through */ }
+    }
+    await navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard");
   };
 
   return (
@@ -68,8 +81,14 @@ export function ChatMessage({ message, isStreaming, onRegenerate, onEdit, onDele
         {isUser ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="mb-1 text-xs font-medium text-muted-foreground">
-          {isUser ? "You" : "dksai"}
+        <div className="mb-1 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <span>{isUser ? "You" : "dksai"}</span>
+          {showTimestamp && (
+            <span className="text-[10px] opacity-60">
+              {new Date(message.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+          {message.bookmarked && <Bookmark className="h-3 w-3 fill-primary text-primary" />}
         </div>
         {isUser ? (
           <div className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
@@ -77,6 +96,9 @@ export function ChatMessage({ message, isStreaming, onRegenerate, onEdit, onDele
           </div>
         ) : (
           <div className="prose prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-2 prose-pre:my-0 prose-pre:bg-transparent prose-pre:p-0 prose-code:before:content-none prose-code:after:content-none">
+            {message.imageUrl && (
+              <img src={message.imageUrl} alt="Generated" className="mb-3 max-h-96 rounded-lg border border-border" />
+            )}
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -114,10 +136,28 @@ export function ChatMessage({ message, isStreaming, onRegenerate, onEdit, onDele
           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={copy}>
             {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
           </Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={share} title="Share">
+            <Share2 className="h-3 w-3" />
+          </Button>
+          {onBookmark && (
+            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={onBookmark} title="Bookmark">
+              <Bookmark className={cn("h-3 w-3", message.bookmarked && "fill-primary text-primary")} />
+            </Button>
+          )}
           {!isUser && onSpeak && (
             <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => onSpeak(message.content)}>
               <Volume2 className="h-3 w-3" />
             </Button>
+          )}
+          {!isUser && onReact && (
+            <>
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => onReact("up")}>
+                <ThumbsUp className={cn("h-3 w-3", message.reaction === "up" && "fill-primary text-primary")} />
+              </Button>
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => onReact("down")}>
+                <ThumbsDown className={cn("h-3 w-3", message.reaction === "down" && "fill-destructive text-destructive")} />
+              </Button>
+            </>
           )}
           {!isUser && onRegenerate && (
             <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={onRegenerate}>
