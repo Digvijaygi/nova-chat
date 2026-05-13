@@ -6,12 +6,17 @@ export interface Message {
   role: Role;
   content: string;
   createdAt: number;
+  reaction?: "up" | "down";
+  bookmarked?: boolean;
+  attachments?: { name: string; preview: string }[];
+  imageUrl?: string;
 }
 export interface Conversation {
   id: string;
   title: string;
   createdAt: number;
   messages: Message[];
+  pinned?: boolean;
 }
 
 const KEY = "dksai.conversations.v1";
@@ -83,6 +88,25 @@ export function useConversations() {
     [updateConversation],
   );
 
+  const togglePin = useCallback(
+    (id: string) =>
+      updateConversation(id, (c) => ({ ...c, pinned: !c.pinned })),
+    [updateConversation],
+  );
+
+  const clearAll = useCallback(() => {
+    persist([]);
+    setActiveId(null);
+  }, [persist]);
+
+  const importConversations = useCallback(
+    (incoming: Conversation[]) => {
+      const merged = [...incoming, ...conversations];
+      persist(merged);
+    },
+    [conversations, persist],
+  );
+
   const active = conversations.find((c) => c.id === activeId) ?? null;
 
   return {
@@ -94,5 +118,8 @@ export function useConversations() {
     deleteConversation,
     updateConversation,
     renameConversation,
+    togglePin,
+    clearAll,
+    importConversations,
   };
 }
