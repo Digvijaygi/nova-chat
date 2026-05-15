@@ -19,7 +19,30 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "dksai — Modern AI Chat" },
-      { name: "description", content: "dksai is a fast, beautiful AI chat with streaming, voice, code mode, image generation, and more." },
+      { name: "description", content: "dksai — fast AI chat with live web search, citations, voice, coding mode, image generation, multi-model switching and a beautiful dark UI." },
+      { name: "keywords", content: "dksai, AI chat, ChatGPT alternative, free AI assistant, web search AI, GPT-5, Gemini, image generation, code AI, voice AI" },
+      { property: "og:title", content: "dksai — Modern AI Chat with Live Web Search" },
+      { property: "og:description", content: "Streaming AI with citations, voice, coding mode, image generation, and multi-model switching." },
+      { property: "og:url", content: "/" },
+      { name: "twitter:title", content: "dksai — Modern AI Chat" },
+      { name: "twitter:description", content: "Streaming AI with live web search, citations, voice and image generation." },
+    ],
+    links: [
+      { rel: "canonical", href: "/" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "dksai",
+          applicationCategory: "Chatbot",
+          operatingSystem: "Web",
+          description: "Modern AI chatbot with live web search, citations, voice input, coding mode and image generation.",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        }),
+      },
     ],
   }),
 });
