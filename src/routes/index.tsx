@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Menu, Sparkles, Zap, Brain, Code2, Palette, Download, Bookmark } from "lucide-react";
+import { Menu, Sparkles, Zap, Brain, Code2, Palette, Download, Bookmark, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/chat/Sidebar";
 import { ChatMessage } from "@/components/chat/ChatMessage";
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/")({
 });
 
 const MODE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  fast: Zap, smart: Brain, coding: Code2, creative: Palette,
+  fast: Zap, smart: Brain, coding: Code2, creative: Palette, search: Globe,
 };
 
 function useLS<T>(key: string, initial: T): [T, (v: T) => void] {

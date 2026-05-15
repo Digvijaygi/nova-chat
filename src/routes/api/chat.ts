@@ -12,7 +12,37 @@ const SYSTEM_PROMPTS: Record<string, string> = {
   smart: `You are dksai. ${NO_BS} Think carefully, then give a structured, accurate answer in markdown. Show reasoning briefly when useful.`,
   coding: `You are dksai, a senior software engineer. ${NO_BS} Always return production-ready code in fenced blocks with the correct language tag. Brief explanations only when needed.`,
   creative: `You are dksai, a creative writer. ${NO_BS} Write vividly with rich detail and rhythm.`,
+  search: `You are dksai with live web search. ${NO_BS} Use the SEARCH RESULTS provided to answer with up-to-date facts. Cite sources INLINE using markdown links like [1](url), [2](url) right after the claim they support. End every answer with a "**Sources**" section listing each numbered link on its own line.`,
 };
+
+async function searchWeb(query: string): Promise<Array<{ title: string; url: string; snippet: string }>> {
+  try {
+    const r = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; dksai/1.0)",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
+    if (!r.ok) return [];
+    const html = await r.text();
+    const out: Array<{ title: string; url: string; snippet: string }> = [];
+    const re = /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(html)) && out.length < 6) {
+      let href = m[1];
+      const uddg = href.match(/uddg=([^&]+)/);
+      if (uddg) href = decodeURIComponent(uddg[1]);
+      if (href.startsWith("//")) href = "https:" + href;
+      const title = m[2].replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").trim();
+      const snippet = m[3].replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").trim();
+      if (/^https?:\/\//.test(href) && title) out.push({ title, url: href, snippet });
+    }
+    return out;
+  } catch (e) {
+    console.error("searchWeb failed", e);
+    return [];
+  }
+}
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -42,9 +72,24 @@ export const Route = createFileRoute("/api/chat")({
           }
 
           const baseSystem = SYSTEM_PROMPTS[mode] ?? SYSTEM_PROMPTS.fast;
-          const system = customSystem?.trim()
+          let system = customSystem?.trim()
             ? `${baseSystem}\n\nADDITIONAL USER INSTRUCTIONS:\n${customSystem.trim()}`
             : baseSystem;
+
+          if (mode === "search") {
+            const lastUser = [...messages].reverse().find((m) => m.role === "user");
+            if (lastUser?.content) {
+              const results = await searchWeb(lastUser.content);
+              if (results.length) {
+                const block = results
+                  .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.snippet}`)
+                  .join("\n\n");
+                system = `${system}\n\nSEARCH RESULTS for "${lastUser.content}" (use these as your primary source, cite inline as [n](url)):\n\n${block}`;
+              } else {
+                system = `${system}\n\n(Web search returned no results — answer from your own knowledge and say so.)`;
+              }
+            }
+          }
 
           const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
