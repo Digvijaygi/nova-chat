@@ -21,6 +21,7 @@ export const MODES = [
   { id: "smart", name: "🧠 Smart", desc: "Deeper reasoning" },
   { id: "coding", name: "💻 Coding", desc: "Production-ready code" },
   { id: "creative", name: "🎨 Creative", desc: "Vivid writing" },
+  { id: "search", name: "🌐 Search", desc: "Live web + citations" },
 ] as const;
 
 export const ACCENTS: Record<string, { primary: string; glow: string; name: string }> = {
