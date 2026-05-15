@@ -14,6 +14,13 @@ export const MODELS = [
   { id: "openai/gpt-5", name: "GPT-5 — Powerful" },
   { id: "openai/gpt-5-mini", name: "GPT-5 mini — Quick" },
   { id: "openai/gpt-5-nano", name: "GPT-5 nano — Ultra fast" },
+  // Direct providers using your own keys (GROQ_API_KEY / GOOGLE_API_KEY)
+  { id: "groq/llama-3.3-70b-versatile", name: "Groq · Llama 3.3 70B — Blazing fast" },
+  { id: "groq/llama-3.1-8b-instant", name: "Groq · Llama 3.1 8B — Instant" },
+  { id: "groq/mixtral-8x7b-32768", name: "Groq · Mixtral 8x7B" },
+  { id: "groq/deepseek-r1-distill-llama-70b", name: "Groq · DeepSeek R1 70B — Reasoning" },
+  { id: "gemini/gemini-2.0-flash", name: "Google · Gemini 2.0 Flash (own key)" },
+  { id: "gemini/gemini-1.5-pro", name: "Google · Gemini 1.5 Pro (own key)" },
 ] as const;
 
 export const MODES = [
