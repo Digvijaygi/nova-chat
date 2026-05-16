@@ -45,7 +45,7 @@ async function searchWeb(query: string): Promise<Array<{ title: string; url: str
   }
 }
 
-export const Route = createFileRoute("/api/chat")({
+export const Route = createFileRoute("/api/public/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
