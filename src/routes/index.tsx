@@ -142,7 +142,7 @@ function ChatPage() {
   // Auto-title for first user message
   const autoTitle = async (convId: string, firstMessage: string) => {
     try {
-      const r = await fetch("/api/title", {
+      const r = await fetch("/api/public/title", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: firstMessage }),
@@ -214,7 +214,7 @@ function ChatPage() {
   const generateImage = async (convId: string, prompt: string, msgId: string) => {
     setBusy(true); setStreamingId(msgId);
     try {
-      const r = await fetch("/api/image", {
+      const r = await fetch("/api/public/image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
