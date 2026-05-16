@@ -47,9 +47,12 @@ export function useConversations() {
     setActiveId(c[0]?.id ?? null);
   }, []);
 
-  const persist = useCallback((c: Conversation[]) => {
-    setConversations(c);
-    write(c);
+  const persist = useCallback((next: Conversation[] | ((prev: Conversation[]) => Conversation[])) => {
+    setConversations((prev) => {
+      const resolved = typeof next === "function" ? next(prev) : next;
+      write(resolved);
+      return resolved;
+    });
   }, []);
 
   const newConversation = useCallback(() => {
@@ -59,11 +62,10 @@ export function useConversations() {
       createdAt: Date.now(),
       messages: [],
     };
-    const next = [conv, ...conversations];
-    persist(next);
+    persist((prev) => [conv, ...prev]);
     setActiveId(conv.id);
     return conv;
-  }, [conversations, persist]);
+  }, [persist]);
 
   const deleteConversation = useCallback(
     (id: string) => {
@@ -76,10 +78,9 @@ export function useConversations() {
 
   const updateConversation = useCallback(
     (id: string, updater: (c: Conversation) => Conversation) => {
-      const next = conversations.map((c) => (c.id === id ? updater(c) : c));
-      persist(next);
+      persist((prev) => prev.map((c) => (c.id === id ? updater(c) : c)));
     },
-    [conversations, persist],
+    [persist],
   );
 
   const renameConversation = useCallback(
@@ -101,10 +102,9 @@ export function useConversations() {
 
   const importConversations = useCallback(
     (incoming: Conversation[]) => {
-      const merged = [...incoming, ...conversations];
-      persist(merged);
+      persist((prev) => [...incoming, ...prev]);
     },
-    [conversations, persist],
+    [persist],
   );
 
   const active = conversations.find((c) => c.id === activeId) ?? null;
