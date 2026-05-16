@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiTitleRouteImport } from './routes/api/title'
+import { Route as ApiPublicTitleRouteImport } from './routes/api/public/title'
 import { Route as ApiPublicImageRouteImport } from './routes/api/public/image'
 import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
 
@@ -19,9 +19,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTitleRoute = ApiTitleRouteImport.update({
-  id: '/api/title',
-  path: '/api/title',
+const ApiPublicTitleRoute = ApiPublicTitleRouteImport.update({
+  id: '/api/public/title',
+  path: '/api/public/title',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicImageRoute = ApiPublicImageRouteImport.update({
@@ -37,36 +37,45 @@ const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/title': typeof ApiTitleRoute
   '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/image': typeof ApiPublicImageRoute
+  '/api/public/title': typeof ApiPublicTitleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/title': typeof ApiTitleRoute
   '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/image': typeof ApiPublicImageRoute
+  '/api/public/title': typeof ApiPublicTitleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/title': typeof ApiTitleRoute
   '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/image': typeof ApiPublicImageRoute
+  '/api/public/title': typeof ApiPublicTitleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/title' | '/api/public/chat' | '/api/public/image'
+  fullPaths:
+    | '/'
+    | '/api/public/chat'
+    | '/api/public/image'
+    | '/api/public/title'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/title' | '/api/public/chat' | '/api/public/image'
-  id: '__root__' | '/' | '/api/title' | '/api/public/chat' | '/api/public/image'
+  to: '/' | '/api/public/chat' | '/api/public/image' | '/api/public/title'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/public/chat'
+    | '/api/public/image'
+    | '/api/public/title'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiTitleRoute: typeof ApiTitleRoute
   ApiPublicChatRoute: typeof ApiPublicChatRoute
   ApiPublicImageRoute: typeof ApiPublicImageRoute
+  ApiPublicTitleRoute: typeof ApiPublicTitleRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -78,11 +87,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/title': {
-      id: '/api/title'
-      path: '/api/title'
-      fullPath: '/api/title'
-      preLoaderRoute: typeof ApiTitleRouteImport
+    '/api/public/title': {
+      id: '/api/public/title'
+      path: '/api/public/title'
+      fullPath: '/api/public/title'
+      preLoaderRoute: typeof ApiPublicTitleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/image': {
@@ -104,9 +113,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiTitleRoute: ApiTitleRoute,
   ApiPublicChatRoute: ApiPublicChatRoute,
   ApiPublicImageRoute: ApiPublicImageRoute,
+  ApiPublicTitleRoute: ApiPublicTitleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
