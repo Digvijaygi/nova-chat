@@ -79,6 +79,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "dksai" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "dksai — Modern AI Chat" },
+      { name: "twitter:title", content: "dksai — Modern AI Chat" },
+      { property: "og:description", content: "dksai — fast AI chat with live web search, citations, voice, coding mode and image generation." },
+      { name: "twitter:description", content: "dksai — fast AI chat with live web search, citations, voice, coding mode and image generation." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/bb0c9c75-68bb-4857-a40f-cd5978c11633" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/bb0c9c75-68bb-4857-a40f-cd5978c11633" },
     ],
     links: [
       {
