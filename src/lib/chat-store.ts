@@ -102,10 +102,9 @@ export function useConversations() {
 
   const importConversations = useCallback(
     (incoming: Conversation[]) => {
-      const merged = [...incoming, ...conversations];
-      persist(merged);
+      persist((prev) => [...incoming, ...prev]);
     },
-    [conversations, persist],
+    [persist],
   );
 
   const active = conversations.find((c) => c.id === activeId) ?? null;
