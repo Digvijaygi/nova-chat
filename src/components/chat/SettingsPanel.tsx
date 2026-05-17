@@ -14,13 +14,50 @@ export const MODELS = [
   { id: "openai/gpt-5", name: "GPT-5 — Powerful" },
   { id: "openai/gpt-5-mini", name: "GPT-5 mini — Quick" },
   { id: "openai/gpt-5-nano", name: "GPT-5 nano — Ultra fast" },
-  // Direct providers using your own keys (GROQ_API_KEY / GOOGLE_API_KEY)
+  // ===== Direct providers (your own API keys, stored as backend secrets) =====
+  // Groq
   { id: "groq/llama-3.3-70b-versatile", name: "Groq · Llama 3.3 70B — Blazing fast" },
   { id: "groq/llama-3.1-8b-instant", name: "Groq · Llama 3.1 8B — Instant" },
   { id: "groq/mixtral-8x7b-32768", name: "Groq · Mixtral 8x7B" },
   { id: "groq/deepseek-r1-distill-llama-70b", name: "Groq · DeepSeek R1 70B — Reasoning" },
+  { id: "groq/llama-3.2-90b-vision-preview", name: "Groq · Llama 3.2 90B Vision" },
+  // Google (own key)
   { id: "gemini/gemini-2.0-flash", name: "Google · Gemini 2.0 Flash (own key)" },
   { id: "gemini/gemini-1.5-pro", name: "Google · Gemini 1.5 Pro (own key)" },
+  { id: "gemini/gemini-1.5-flash", name: "Google · Gemini 1.5 Flash (own key)" },
+  // OpenRouter (gateway to 200+ models)
+  { id: "openrouter/anthropic/claude-3.5-sonnet", name: "OpenRouter · Claude 3.5 Sonnet" },
+  { id: "openrouter/anthropic/claude-3.5-haiku", name: "OpenRouter · Claude 3.5 Haiku" },
+  { id: "openrouter/meta-llama/llama-3.3-70b-instruct", name: "OpenRouter · Llama 3.3 70B" },
+  { id: "openrouter/qwen/qwen-2.5-72b-instruct", name: "OpenRouter · Qwen 2.5 72B" },
+  { id: "openrouter/nousresearch/hermes-3-llama-3.1-405b", name: "OpenRouter · Hermes 3 405B (uncensored)" },
+  // Mistral
+  { id: "mistral/mistral-large-latest", name: "Mistral Large" },
+  { id: "mistral/mistral-small-latest", name: "Mistral Small" },
+  { id: "mistral/codestral-latest", name: "Mistral · Codestral (code)" },
+  // xAI Grok
+  { id: "xai/grok-2-latest", name: "xAI · Grok 2" },
+  { id: "xai/grok-beta", name: "xAI · Grok Beta" },
+  // Perplexity (online + citations)
+  { id: "perplexity/llama-3.1-sonar-large-128k-online", name: "Perplexity · Sonar Large Online" },
+  { id: "perplexity/llama-3.1-sonar-small-128k-online", name: "Perplexity · Sonar Small Online" },
+  // DeepSeek direct
+  { id: "deepseek/deepseek-chat", name: "DeepSeek · Chat V3" },
+  { id: "deepseek/deepseek-reasoner", name: "DeepSeek · R1 Reasoner" },
+  // Together AI
+  { id: "together/meta-llama/Llama-3.3-70B-Instruct-Turbo", name: "Together · Llama 3.3 70B Turbo" },
+  { id: "together/Qwen/Qwen2.5-Coder-32B-Instruct", name: "Together · Qwen2.5 Coder 32B" },
+  // Fireworks
+  { id: "fireworks/accounts/fireworks/models/llama-v3p3-70b-instruct", name: "Fireworks · Llama 3.3 70B" },
+  { id: "fireworks/accounts/fireworks/models/deepseek-r1", name: "Fireworks · DeepSeek R1" },
+  // Cerebras (fastest inference)
+  { id: "cerebras/llama-3.3-70b", name: "Cerebras · Llama 3.3 70B — Fastest" },
+  { id: "cerebras/llama3.1-8b", name: "Cerebras · Llama 3.1 8B" },
+  // SambaNova
+  { id: "sambanova/Meta-Llama-3.3-70B-Instruct", name: "SambaNova · Llama 3.3 70B" },
+  // OpenAI direct (own key)
+  { id: "openaidirect/gpt-4o", name: "OpenAI direct · GPT-4o" },
+  { id: "openaidirect/gpt-4o-mini", name: "OpenAI direct · GPT-4o mini" },
 ] as const;
 
 export const MODES = [
