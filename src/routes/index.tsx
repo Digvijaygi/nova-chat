@@ -112,7 +112,7 @@ function ChatPage() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [personaOpen, setPersonaOpen] = useState(false);
-  const [pendingPrompt, setPendingPrompt] = useState<string>("");
+  const [seedPrompt, setSeedPrompt] = useState<{ text: string; n: number } | null>(null);
   const { focus, toggle: toggleFocus } = useFocusMode();
   const persona = PERSONAS.find((p) => p.id === personaId) ?? PERSONAS[0];
 
@@ -554,7 +554,7 @@ function ChatPage() {
           />
         )}
 
-        <ChatInput onSend={handleSend} onStop={handleStop} busy={busy} voiceLang={voiceLang} initialValue={pendingPrompt} />
+        <ChatInput onSend={handleSend} onStop={handleStop} busy={busy} voiceLang={voiceLang} seed={seedPrompt} />
       </main>
 
       <SettingsPanel
@@ -577,7 +577,7 @@ function ChatPage() {
       />
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} actions={commandActions} />
-      <PromptLibraryDialog open={libraryOpen} onOpenChange={setLibraryOpen} onPick={(p) => { setPendingPrompt(p.prompt); toast.success(`Loaded: ${p.title}`); }} />
+      <PromptLibraryDialog open={libraryOpen} onOpenChange={setLibraryOpen} onPick={(p) => { setSeedPrompt({ text: p.prompt, n: Date.now() }); toast.success(`Loaded: ${p.title}`); }} />
       <PersonaDialog open={personaOpen} onOpenChange={setPersonaOpen} activeId={personaId} onPick={(p) => { setPersonaId(p.id); toast.success(`Persona → ${p.emoji} ${p.name}`); }} />
     </div>
   );
