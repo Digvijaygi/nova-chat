@@ -600,7 +600,15 @@ function Welcome({ onPick }: { onPick: (t: string) => void }) {
         How can <span className="text-brand-gradient">dksai</span> help today?
       </h1>
       <p className="mt-2 max-w-md text-sm text-muted-foreground">
-        Ask anything. Try <code className="rounded bg-muted px-1">/image</code>, <code className="rounded bg-muted px-1">/code</code>, or attach a file.
+        Ask anything. Try <code className="rounded bg-muted px-1">/image</code>, <code className="rounded bg-muted px-1">/code</code>, or attach a file. Developed by{" "}
+        <a 
+          href="https://dksnext.vercel.app/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="font-medium underline underline-offset-4 hover:text-primary transition-colors"
+        >
+          Digvijay(DKSNEXT)
+        </a>
       </p>
       <div className="mt-8 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
         {SUGGESTIONS.map((s) => (
