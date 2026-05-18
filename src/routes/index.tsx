@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Menu, Sparkles, Zap, Brain, Code2, Palette, Download, Bookmark, Globe } from "lucide-react";
+import { Menu, Sparkles, Zap, Brain, Code2, Palette, Download, Bookmark, Globe, Command, BookOpen, Drama, Focus, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/chat/Sidebar";
 import { ChatMessage } from "@/components/chat/ChatMessage";
@@ -13,6 +13,11 @@ import { toast } from "sonner";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  CommandPalette, PromptLibraryDialog, PersonaDialog, AuroraBackground, StatsHUD, useFocusMode,
+  type CommandAction,
+} from "@/components/chat/FeaturePack";
+import { PERSONAS } from "@/lib/personas";
 
 export const Route = createFileRoute("/")({
   component: ChatPage,
@@ -103,6 +108,13 @@ function ChatPage() {
   const [soundOnDone, setSoundOnDone] = useLS<boolean>("dksai.sound", false);
   const [voiceLang, setVoiceLang] = useLS<string>("dksai.voiceLang", "en-US");
   const [showBookmarks, setShowBookmarks] = useState(false);
+  const [personaId, setPersonaId] = useLS<string>("dksai.persona", "default");
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [personaOpen, setPersonaOpen] = useState(false);
+  const [seedPrompt, setSeedPrompt] = useState<{ text: string; n: number } | null>(null);
+  const { focus, toggle: toggleFocus } = useFocusMode();
+  const persona = PERSONAS.find((p) => p.id === personaId) ?? PERSONAS[0];
 
   const [busy, setBusy] = useState(false);
   const [streamingId, setStreamingId] = useState<string | null>(null);
@@ -163,12 +175,13 @@ function ChatPage() {
     abortRef.current = ctrl;
     try {
       let acc = "";
+      const combinedSystem = [persona.system, customSystem.trim()].filter(Boolean).join("\n\n");
       await streamChat({
         messages: history,
         model,
         mode,
         temperature,
-        customSystem: customSystem.trim() || undefined,
+        customSystem: combinedSystem || undefined,
         signal: ctrl.signal,
         onDelta: (chunk) => {
           acc += chunk;
@@ -384,7 +397,11 @@ function ChatPage() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const meta = e.metaKey || e.ctrlKey;
-      if (meta && e.key.toLowerCase() === "k") { e.preventDefault(); newConversation(); }
+      if (meta && e.key.toLowerCase() === "k") { e.preventDefault(); setPaletteOpen(true); }
+      if (meta && e.key.toLowerCase() === "j") { e.preventDefault(); newConversation(); }
+      if (meta && e.key.toLowerCase() === "p") { e.preventDefault(); setLibraryOpen(true); }
+      if (meta && e.shiftKey && e.key.toLowerCase() === "p") { e.preventDefault(); setPersonaOpen(true); }
+      if (meta && e.key === ".") { e.preventDefault(); toggleFocus(); }
       if (meta && e.key.toLowerCase() === "l") {
         e.preventDefault();
         (document.querySelector("textarea") as HTMLTextAreaElement | null)?.focus();
@@ -393,7 +410,7 @@ function ChatPage() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [newConversation]);
+  }, [newConversation, toggleFocus]);
 
   const ModeIcon = MODE_ICONS[mode] ?? Zap;
 
@@ -403,10 +420,23 @@ function ChatPage() {
 
   // stats
   const wordCount = active?.messages.reduce((n, m) => n + m.content.split(/\s+/).filter(Boolean).length, 0) ?? 0;
+  const charCount = active?.messages.reduce((n, m) => n + m.content.length, 0) ?? 0;
+
+  const commandActions: CommandAction[] = [
+    { id: "new", label: "New chat", icon: Sparkles, shortcut: "⌘J", group: "Actions", run: () => newConversation() },
+    { id: "library", label: "Open Prompt Library", icon: BookOpen, shortcut: "⌘P", group: "Actions", run: () => setLibraryOpen(true) },
+    { id: "persona", label: "Switch Persona", icon: Drama, shortcut: "⌘⇧P", group: "Actions", run: () => setPersonaOpen(true) },
+    { id: "settings", label: "Open Settings", icon: Sparkles, shortcut: "⌘/", group: "Actions", run: () => setSettingsOpen(true) },
+    { id: "focus", label: focus ? "Exit Focus Mode" : "Enter Focus Mode", icon: Focus, shortcut: "⌘.", group: "Actions", run: toggleFocus },
+    { id: "export", label: "Export current chat", icon: Download, group: "Actions", run: () => exportCurrent() },
+    { id: "clear-current", label: "Clear current chat", icon: Bookmark, group: "Actions", run: () => active && updateConversation(active.id, (c) => ({ ...c, messages: [] })) },
+    ...MODES.map((m) => ({ id: `mode-${m.id}`, label: `Mode: ${m.name}`, hint: m.desc, group: "Modes" as const, run: () => setMode(m.id), icon: Zap })),
+    ...PERSONAS.map((p) => ({ id: `persona-${p.id}`, label: `${p.emoji} ${p.name}`, hint: p.desc, group: "Personas" as const, run: () => { setPersonaId(p.id); toast.success(`Persona: ${p.name}`); }, icon: Drama })),
+  ];
 
   return (
     <div className="relative flex h-dvh w-full overflow-hidden bg-background text-foreground">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={{ backgroundImage: "var(--gradient-glow)" }} />
+      <AuroraBackground />
 
       <Sidebar
         conversations={conversations}
@@ -448,6 +478,18 @@ function ChatPage() {
           </div>
 
           <div className="ml-auto flex items-center gap-1">
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => setPaletteOpen(true)} title="Command Palette (⌘K)">
+              <Command className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => setLibraryOpen(true)} title="Prompt Library (⌘P)">
+              <BookOpen className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => setPersonaOpen(true)} title={`Persona: ${persona.name}`}>
+              <span className="text-base leading-none">{persona.emoji}</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={toggleFocus} title="Focus mode (⌘.)">
+              {focus ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
             {active && active.messages.length > 0 && (
               <>
                 <Button
@@ -502,12 +544,17 @@ function ChatPage() {
         </div>
 
         {active && active.messages.length > 0 && (
-          <div className="border-t border-border/40 px-3 py-1 text-center text-[10px] text-muted-foreground">
-            {active.messages.length} messages · {wordCount} words · ~{Math.ceil(wordCount * 1.3)} tokens
-          </div>
+          <StatsHUD
+            messages={active.messages.length}
+            words={wordCount}
+            chars={charCount}
+            personaName={persona.name}
+            modeName={MODES.find((m) => m.id === mode)?.name ?? mode}
+            modelName={model}
+          />
         )}
 
-        <ChatInput onSend={handleSend} onStop={handleStop} busy={busy} voiceLang={voiceLang} />
+        <ChatInput onSend={handleSend} onStop={handleStop} busy={busy} voiceLang={voiceLang} seed={seedPrompt} />
       </main>
 
       <SettingsPanel
@@ -528,6 +575,10 @@ function ChatPage() {
         onImportAll={importAll}
         onClearAll={handleClearAll}
       />
+
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} actions={commandActions} />
+      <PromptLibraryDialog open={libraryOpen} onOpenChange={setLibraryOpen} onPick={(p) => { setSeedPrompt({ text: p.prompt, n: Date.now() }); toast.success(`Loaded: ${p.title}`); }} />
+      <PersonaDialog open={personaOpen} onOpenChange={setPersonaOpen} activeId={personaId} onPick={(p) => { setPersonaId(p.id); toast.success(`Persona → ${p.emoji} ${p.name}`); }} />
     </div>
   );
 }
