@@ -208,8 +208,8 @@ export function ChatInput({ onSend, onStop, busy, initialValue = "", seed, voice
         )}
       </div>
       <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>⌘/Ctrl+K new chat · ⌘/Ctrl+L focus · Shift+Enter newline</span>
-        <span>{charCount > 0 ? `${charCount} chars` : "dksai can make mistakes"}</span>
+        <span>Ctrl+K new chat · Ctrl+L focus · Shift+Enter newline</span>
+        <span>{charCount > 0 ? `${charCount} chars` : "dksai Developed by Digvijay(DKSNEXT)"}</span>
       </div>
     </div>
   );
