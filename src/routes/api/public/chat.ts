@@ -40,11 +40,60 @@ const PROVIDERS: Record<string, Provider> = {
   cerebras:   { url: "https://api.cerebras.ai/v1/chat/completions",                            envKey: "CEREBRAS_API_KEY",   label: "Cerebras" },
   sambanova:  { url: "https://api.sambanova.ai/v1/chat/completions",                           envKey: "SAMBANOVA_API_KEY",  label: "SambaNova" },
   openaidirect: { url: "https://api.openai.com/v1/chat/completions",                           envKey: "OPENAI_API_KEY",     label: "OpenAI (direct)" },
+  nvidia:     { url: "https://integrate.api.nvidia.com/v1/chat/completions",                   envKey: "NVIDIA_API_KEY",     label: "NVIDIA NIM" },
+  cohere:     { url: "https://api.cohere.com/compatibility/v1/chat/completions",               envKey: "COHERE_API_KEY",     label: "Cohere" },
 };
 
-async function searchWeb(query: string): Promise<Array<{ title: string; url: string; snippet: string }>> {
+// ---------- Advanced Web Search ----------
+// Multi-engine with provider preference: Tavily (if key) → Brave (if key) → DuckDuckGo HTML fallback.
+// Optionally enriches the top result with a short page-text excerpt for higher-quality answers.
+
+type SearchHit = { title: string; url: string; snippet: string; source?: string; published?: string };
+
+async function searchTavily(q: string): Promise<SearchHit[]> {
+  const key = process.env.TAVILY_API_KEY;
+  if (!key) return [];
   try {
-    const r = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
+    const r = await fetch("https://api.tavily.com/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        api_key: key,
+        query: q,
+        search_depth: "advanced",
+        max_results: 8,
+        include_answer: false,
+      }),
+    });
+    if (!r.ok) return [];
+    const j: any = await r.json();
+    return (j.results ?? []).map((x: any) => ({
+      title: x.title, url: x.url, snippet: x.content ?? "", source: "tavily",
+      published: x.published_date,
+    }));
+  } catch { return []; }
+}
+
+async function searchBrave(q: string): Promise<SearchHit[]> {
+  const key = process.env.BRAVE_SEARCH_API_KEY;
+  if (!key) return [];
+  try {
+    const r = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(q)}&count=8`, {
+      headers: { "X-Subscription-Token": key, Accept: "application/json" },
+    });
+    if (!r.ok) return [];
+    const j: any = await r.json();
+    const web = j?.web?.results ?? [];
+    return web.map((x: any) => ({
+      title: x.title, url: x.url, snippet: x.description ?? "", source: "brave",
+      published: x.age,
+    }));
+  } catch { return []; }
+}
+
+async function searchDDG(q: string): Promise<SearchHit[]> {
+  try {
+    const r = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; dksai/1.0)",
         "Accept-Language": "en-US,en;q=0.9",
@@ -52,23 +101,70 @@ async function searchWeb(query: string): Promise<Array<{ title: string; url: str
     });
     if (!r.ok) return [];
     const html = await r.text();
-    const out: Array<{ title: string; url: string; snippet: string }> = [];
+    const out: SearchHit[] = [];
     const re = /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
     let m: RegExpExecArray | null;
-    while ((m = re.exec(html)) && out.length < 6) {
+    while ((m = re.exec(html)) && out.length < 8) {
       let href = m[1];
       const uddg = href.match(/uddg=([^&]+)/);
       if (uddg) href = decodeURIComponent(uddg[1]);
       if (href.startsWith("//")) href = "https:" + href;
       const title = m[2].replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").trim();
       const snippet = m[3].replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").trim();
-      if (/^https?:\/\//.test(href) && title) out.push({ title, url: href, snippet });
+      if (/^https?:\/\//.test(href) && title) out.push({ title, url: href, snippet, source: "ddg" });
     }
     return out;
-  } catch (e) {
-    console.error("searchWeb failed", e);
-    return [];
+  } catch { return []; }
+}
+
+async function fetchPageExcerpt(url: string): Promise<string> {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch(url, {
+      signal: ctrl.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; dksai/1.0)" },
+    });
+    clearTimeout(t);
+    if (!r.ok) return "";
+    const ct = r.headers.get("content-type") ?? "";
+    if (!ct.includes("text/html") && !ct.includes("text/plain")) return "";
+    const html = (await r.text()).slice(0, 200_000);
+    // crude readability: strip scripts/styles/nav, collapse whitespace
+    const text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<nav[\s\S]*?<\/nav>/gi, " ")
+      .replace(/<header[\s\S]*?<\/header>/gi, " ")
+      .replace(/<footer[\s\S]*?<\/footer>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/\s+/g, " ")
+      .trim();
+    return text.slice(0, 1800);
+  } catch { return ""; }
+}
+
+async function searchWeb(query: string): Promise<SearchHit[]> {
+  // Try premium engines first, fall back to free DDG
+  const seq = [searchTavily, searchBrave, searchDDG];
+  for (const fn of seq) {
+    const hits = await fn(query);
+    if (hits.length) {
+      // dedupe by domain+title
+      const seen = new Set<string>();
+      return hits.filter((h) => {
+        const k = `${new URL(h.url).hostname}|${h.title.slice(0, 60)}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      }).slice(0, 8);
+    }
   }
+  return [];
 }
 
 export const Route = createFileRoute("/api/public/chat")({
@@ -109,10 +205,18 @@ export const Route = createFileRoute("/api/public/chat")({
             if (lastUser?.content) {
               const results = await searchWeb(lastUser.content);
               if (results.length) {
+                // Enrich top 2 results with page excerpts for higher answer fidelity
+                const top = results.slice(0, 2);
+                const excerpts = await Promise.all(top.map((h) => fetchPageExcerpt(h.url)));
                 const block = results
-                  .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.snippet}`)
+                  .map((r, i) => {
+                    const ex = i < excerpts.length && excerpts[i] ? `\nEXCERPT: ${excerpts[i]}` : "";
+                    const pub = r.published ? ` (${r.published})` : "";
+                    return `[${i + 1}] ${r.title}${pub}\nURL: ${r.url}\n${r.snippet}${ex}`;
+                  })
                   .join("\n\n");
-                system = `${system}\n\nSEARCH RESULTS for "${lastUser.content}" (use these as your primary source, cite inline as [n](url)):\n\n${block}`;
+                const engine = results[0]?.source ?? "web";
+                system = `${system}\n\nLIVE SEARCH RESULTS (engine: ${engine}, time: ${new Date().toISOString()}) for "${lastUser.content}".\nUse these as the primary source. Cite EVERY factual claim inline as [n](url). End with a **Sources** section.\n\n${block}`;
               } else {
                 system = `${system}\n\n(Web search returned no results — answer from your own knowledge and say so.)`;
               }

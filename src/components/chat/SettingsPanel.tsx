@@ -58,6 +58,17 @@ export const MODELS = [
   // OpenAI direct (own key)
   { id: "openaidirect/gpt-4o", name: "OpenAI direct · GPT-4o" },
   { id: "openaidirect/gpt-4o-mini", name: "OpenAI direct · GPT-4o mini" },
+  // NVIDIA NIM (OpenAI-compatible)
+  { id: "nvidia/meta/llama-3.3-70b-instruct", name: "NVIDIA NIM · Llama 3.3 70B" },
+  { id: "nvidia/meta/llama-3.1-405b-instruct", name: "NVIDIA NIM · Llama 3.1 405B" },
+  { id: "nvidia/nvidia/llama-3.1-nemotron-70b-instruct", name: "NVIDIA NIM · Nemotron 70B" },
+  { id: "nvidia/deepseek-ai/deepseek-r1", name: "NVIDIA NIM · DeepSeek R1" },
+  { id: "nvidia/qwen/qwen2.5-coder-32b-instruct", name: "NVIDIA NIM · Qwen 2.5 Coder 32B" },
+  { id: "nvidia/mistralai/mixtral-8x22b-instruct-v0.1", name: "NVIDIA NIM · Mixtral 8x22B" },
+  // Cohere (OpenAI-compatible endpoint)
+  { id: "cohere/command-r-plus", name: "Cohere · Command R+ (RAG king)" },
+  { id: "cohere/command-r", name: "Cohere · Command R" },
+  { id: "cohere/command-a-03-2025", name: "Cohere · Command A (latest)" },
 ] as const;
 
 export const MODES = [
@@ -271,6 +282,9 @@ export function SettingsPanel({
                 <li><code className="rounded bg-muted px-1">MISTRAL_API_KEY</code> · <code className="rounded bg-muted px-1">XAI_API_KEY</code> · <code className="rounded bg-muted px-1">PERPLEXITY_API_KEY</code></li>
                 <li><code className="rounded bg-muted px-1">DEEPSEEK_API_KEY</code> · <code className="rounded bg-muted px-1">TOGETHER_API_KEY</code> · <code className="rounded bg-muted px-1">FIREWORKS_API_KEY</code></li>
                 <li><code className="rounded bg-muted px-1">CEREBRAS_API_KEY</code> · <code className="rounded bg-muted px-1">SAMBANOVA_API_KEY</code> · <code className="rounded bg-muted px-1">OPENAI_API_KEY</code></li>
+                <li><code className="rounded bg-muted px-1">NVIDIA_API_KEY</code> — NVIDIA NIM (Llama, Nemotron, DeepSeek R1)</li>
+                <li><code className="rounded bg-muted px-1">COHERE_API_KEY</code> — Cohere Command R+/A</li>
+                <li className="pt-1"><strong className="text-foreground">Optional advanced search:</strong> <code className="rounded bg-muted px-1">TAVILY_API_KEY</code> (deepest), <code className="rounded bg-muted px-1">BRAVE_SEARCH_API_KEY</code> — auto-used in Search mode when present; falls back to free DuckDuckGo otherwise.</li>
               </ul>
               <p className="pt-1">Conversations are stored locally in your browser only.</p>
             </div>
