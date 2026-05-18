@@ -9,6 +9,7 @@ interface Props {
   onStop?: () => void;
   busy?: boolean;
   initialValue?: string;
+  seed?: { text: string; n: number } | null;
   voiceLang?: string;
 }
 
@@ -34,7 +35,7 @@ const SLASH_COMMANDS = [
   { cmd: "/summary", desc: "Summarize this chat", icon: Sparkles },
 ];
 
-export function ChatInput({ onSend, onStop, busy, initialValue = "", voiceLang = "en-US" }: Props) {
+export function ChatInput({ onSend, onStop, busy, initialValue = "", seed, voiceLang = "en-US" }: Props) {
   const [value, setValue] = useState(initialValue);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SR | null>(null);
@@ -42,6 +43,14 @@ export function ChatInput({ onSend, onStop, busy, initialValue = "", voiceLang =
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setValue(initialValue), [initialValue]);
+
+  useEffect(() => {
+    if (seed && seed.text) {
+      setValue(seed.text);
+      setTimeout(() => taRef.current?.focus(), 30);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seed?.n]);
 
   useEffect(() => {
     const ta = taRef.current;
