@@ -319,19 +319,6 @@ export function SettingsPanel({
             <Button variant="destructive" onClick={onClearAll} className="w-full">Clear all chats</Button>
             <div className="rounded-lg border border-border bg-secondary/30 p-3 text-xs text-muted-foreground space-y-1">
               <p><strong className="text-foreground">All API keys are backend-only secrets</strong> — never visible in browser, code, or network. Add them in Lovable Cloud → Secrets (or as Cloudflare Worker secrets when self-deploying):</p>
-              <ul className="list-disc pl-4 space-y-0.5">
-                <li><code className="rounded bg-muted px-1">LOVABLE_API_KEY</code> — default gateway (GPT-5, Gemini 3)</li>
-                <li><code className="rounded bg-muted px-1">GROQ_API_KEY</code> — Groq (Llama, Mixtral, DeepSeek R1)</li>
-                <li><code className="rounded bg-muted px-1">GOOGLE_API_KEY</code> — Gemini direct</li>
-                <li><code className="rounded bg-muted px-1">OPENROUTER_API_KEY</code> — Claude, Llama, Qwen, 200+ models</li>
-                <li><code className="rounded bg-muted px-1">MISTRAL_API_KEY</code> · <code className="rounded bg-muted px-1">XAI_API_KEY</code> · <code className="rounded bg-muted px-1">PERPLEXITY_API_KEY</code></li>
-                <li><code className="rounded bg-muted px-1">DEEPSEEK_API_KEY</code> · <code className="rounded bg-muted px-1">TOGETHER_API_KEY</code> · <code className="rounded bg-muted px-1">FIREWORKS_API_KEY</code></li>
-                <li><code className="rounded bg-muted px-1">CEREBRAS_API_KEY</code> · <code className="rounded bg-muted px-1">SAMBANOVA_API_KEY</code> · <code className="rounded bg-muted px-1">OPENAI_API_KEY</code></li>
-                <li><code className="rounded bg-muted px-1">NVIDIA_API_KEY</code> — NVIDIA NIM (Llama, Nemotron, DeepSeek R1)</li>
-                <li><code className="rounded bg-muted px-1">COHERE_API_KEY</code> — Cohere Command R+/A</li>
-                <li className="pt-1"><strong className="text-foreground">Optional advanced search:</strong> <code className="rounded bg-muted px-1">TAVILY_API_KEY</code> (deepest), <code className="rounded bg-muted px-1">BRAVE_SEARCH_API_KEY</code> — auto-used in Search mode when present; falls back to free DuckDuckGo otherwise.</li>
-              </ul>
-              <p className="pt-1">Conversations are stored locally in your browser only.</p>
             </div>
           </TabsContent>
         </Tabs>
