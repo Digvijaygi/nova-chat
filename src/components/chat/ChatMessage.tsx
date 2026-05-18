@@ -132,7 +132,7 @@ export function ChatMessage({ message, isStreaming, onRegenerate, onEdit, onDele
           </div>
         )}
 
-        <div className="mt-2 flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+        <div className="mt-2 flex items-center gap-1 opacity-100">
           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={copy}>
             {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
           </Button>
