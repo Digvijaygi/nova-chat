@@ -224,7 +224,13 @@ export function AuroraBackground() {
       <div className="absolute -top-32 left-1/3 h-96 w-96 animate-aurora-1 rounded-full bg-primary/20 blur-3xl" />
       <div className="absolute top-1/3 right-1/4 h-[28rem] w-[28rem] animate-aurora-2 rounded-full bg-accent/20 blur-3xl" />
       <div className="absolute -bottom-32 left-1/4 h-96 w-96 animate-aurora-3 rounded-full bg-primary/15 blur-3xl" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,oklch(var(--primary)/0.04)_1px,transparent_1px),linear-gradient(to_bottom,oklch(var(--primary)/0.04)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
+      <div
+        className="absolute inset-0 bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px)",
+        }}
+      />
     </div>
   );
 }
