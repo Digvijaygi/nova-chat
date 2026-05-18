@@ -174,3 +174,38 @@
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   .animate-fade-in-up { animation: fadeInUp .35s ease-out both; }
 }
+
+@layer utilities {
+  @keyframes aurora1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.15); } }
+  @keyframes aurora2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-50px,40px) scale(1.1); } }
+  @keyframes aurora3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,50px) scale(1.2); } }
+  .animate-aurora-1 { animation: aurora1 18s ease-in-out infinite; }
+  .animate-aurora-2 { animation: aurora2 22s ease-in-out infinite; }
+  .animate-aurora-3 { animation: aurora3 26s ease-in-out infinite; }
+
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  .shimmer-text {
+    background: linear-gradient(90deg, var(--color-muted-foreground) 0%, var(--color-foreground) 50%, var(--color-muted-foreground) 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 2.4s linear infinite;
+  }
+
+  /* Focus mode — hides sidebar and chrome */
+  .focus-mode aside { display: none !important; }
+  .focus-mode header { opacity: 0.25; transition: opacity .3s; }
+  .focus-mode header:hover { opacity: 1; }
+
+  /* Glow ring for active streaming */
+  @keyframes pulseRing {
+    0% { box-shadow: 0 0 0 0 oklch(var(--primary) / 0.5); }
+    70% { box-shadow: 0 0 0 12px oklch(var(--primary) / 0); }
+    100% { box-shadow: 0 0 0 0 oklch(var(--primary) / 0); }
+  }
+  .pulse-ring { animation: pulseRing 1.6s ease-out infinite; }
+
+  /* Custom selection */
+  ::selection { background: oklch(var(--primary) / 0.35); color: var(--color-foreground); }
+}
