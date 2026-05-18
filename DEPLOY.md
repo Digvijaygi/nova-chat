@@ -28,6 +28,11 @@ bunx wrangler secret put FIREWORKS_API_KEY
 bunx wrangler secret put CEREBRAS_API_KEY
 bunx wrangler secret put SAMBANOVA_API_KEY
 bunx wrangler secret put OPENAI_API_KEY
+bunx wrangler secret put NVIDIA_API_KEY
+bunx wrangler secret put COHERE_API_KEY
+# Optional advanced search engines (auto-used in Search mode if present):
+bunx wrangler secret put TAVILY_API_KEY
+bunx wrangler secret put BRAVE_SEARCH_API_KEY
 # (only the providers whose models you actually use are required)
 
 # 3. Build + deploy
@@ -52,6 +57,10 @@ That's it. Cloudflare returns a `*.workers.dev` URL or attach your domain in the
 | Cerebras     | https://cloud.cerebras.ai/                 | ✅ free     |
 | SambaNova    | https://cloud.sambanova.ai/                | ✅          |
 | OpenAI       | https://platform.openai.com/api-keys       | paid        |
+| NVIDIA NIM   | https://build.nvidia.com/                  | ✅ free credits |
+| Cohere       | https://dashboard.cohere.com/api-keys      | ✅ trial    |
+| Tavily search| https://app.tavily.com/                    | ✅ 1k/month |
+| Brave search | https://api.search.brave.com/              | ✅ 2k/month |
 
 ## SEO
 `public/robots.txt`, `public/sitemap.xml`, per-route `<head>` meta + JSON-LD, and canonical tags are pre-configured. After deploy, submit your sitemap at Google Search Console: `https://YOUR-DOMAIN/sitemap.xml`.
