@@ -282,18 +282,38 @@ export function SettingsPanel({
           <TabsContent value="appearance" className="space-y-4 pt-4">
             <div className="space-y-2">
               <Label>Accent color</Label>
-              <div className="flex gap-2">
-                {Object.entries(ACCENTS).map(([k, v]) => (
-                  <button
-                    key={k}
-                    onClick={() => setAccent(k)}
-                    className={`h-9 w-9 rounded-full ring-offset-2 ring-offset-background transition ${accent === k ? "ring-2 ring-foreground" : ""}`}
-                    style={{ background: `oklch(${v.primary})` }}
-                    title={v.name}
-                  />
-                ))}
-              </div>
+              <Select value={accent} onValueChange={setAccent}>
+                <SelectTrigger className="w-full">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="h-5 w-5 rounded-full" 
+                      style={{ background: `oklch(${ACCENTS[accent]?.primary || "0.72 0.20 295"})` }}
+                    />
+                    <SelectValue placeholder="Select color" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="max-h-80">
+                  <div className="grid grid-cols-4 gap-1 p-2">
+                    {Object.entries(ACCENTS).map(([k, v]) => (
+                      <button
+                        key={k}
+                        onClick={() => setAccent(k)}
+                        className={`flex flex-col items-center gap-1 rounded-md p-2 transition-all hover:bg-accent ${
+                          accent === k ? "bg-accent ring-1 ring-primary" : ""
+                        }`}
+                      >
+                        <div 
+                          className="h-8 w-8 rounded-full shadow-sm" 
+                          style={{ background: `oklch(${v.primary})` }}
+                        />
+                        <span className="text-[10px] font-medium">{v.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </SelectContent>
+              </Select>
             </div>
+
             <div className="space-y-2">
               <div className="flex justify-between">
                 <Label>Font size</Label>
