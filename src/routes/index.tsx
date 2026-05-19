@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Menu, Sparkles, Zap, Brain, Code2, Palette, Download, Bookmark, Globe, Command, BookOpen, Drama, Focus, Eye, EyeOff } from "lucide-react";
+import { Menu, Sparkles, Zap, Brain, Code2, Palette, Download, Bookmark, Globe, Command, BookOpen, Drama, Focus, Eye, EyeOff, Layers, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/chat/Sidebar";
 import { ChatMessage } from "@/components/chat/ChatMessage";
@@ -18,6 +18,8 @@ import {
   type CommandAction,
 } from "@/components/chat/FeaturePack";
 import { PERSONAS } from "@/lib/personas";
+import { EnsembleDialog } from "@/components/chat/EnsembleDialog";
+import { AgentDialog } from "@/components/chat/AgentDialog";
 
 export const Route = createFileRoute("/")({
   component: ChatPage,
@@ -112,6 +114,8 @@ function ChatPage() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [personaOpen, setPersonaOpen] = useState(false);
+  const [ensembleOpen, setEnsembleOpen] = useState(false);
+  const [agentOpen, setAgentOpen] = useState(false);
   const [seedPrompt, setSeedPrompt] = useState<{ text: string; n: number } | null>(null);
   const { focus, toggle: toggleFocus } = useFocusMode();
   const persona = PERSONAS.find((p) => p.id === personaId) ?? PERSONAS[0];
@@ -407,6 +411,8 @@ function ChatPage() {
         (document.querySelector("textarea") as HTMLTextAreaElement | null)?.focus();
       }
       if (meta && e.key === "/") { e.preventDefault(); setSettingsOpen(true); }
+      if (meta && e.key.toLowerCase() === "e") { e.preventDefault(); setEnsembleOpen(true); }
+      if (meta && e.key.toLowerCase() === "b") { e.preventDefault(); setAgentOpen(true); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -426,6 +432,8 @@ function ChatPage() {
     { id: "new", label: "New chat", icon: Sparkles, shortcut: "⌘J", group: "Actions", run: () => newConversation() },
     { id: "library", label: "Open Prompt Library", icon: BookOpen, shortcut: "⌘P", group: "Actions", run: () => setLibraryOpen(true) },
     { id: "persona", label: "Switch Persona", icon: Drama, shortcut: "⌘⇧P", group: "Actions", run: () => setPersonaOpen(true) },
+    { id: "ensemble", label: "Multi-Model Ensemble", icon: Layers, shortcut: "⌘E", group: "Actions", run: () => setEnsembleOpen(true) },
+    { id: "agent", label: "Agent Workflow", icon: Bot, shortcut: "⌘B", group: "Actions", run: () => setAgentOpen(true) },
     { id: "settings", label: "Open Settings", icon: Sparkles, shortcut: "⌘/", group: "Actions", run: () => setSettingsOpen(true) },
     { id: "focus", label: focus ? "Exit Focus Mode" : "Enter Focus Mode", icon: Focus, shortcut: "⌘.", group: "Actions", run: toggleFocus },
     { id: "export", label: "Export current chat", icon: Download, group: "Actions", run: () => exportCurrent() },
@@ -486,6 +494,12 @@ function ChatPage() {
             </Button>
             <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => setPersonaOpen(true)} title={`Persona: ${persona.name}`}>
               <span className="text-base leading-none">{persona.emoji}</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => setEnsembleOpen(true)} title="Multi-Model Ensemble (⌘E)">
+              <Layers className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => setAgentOpen(true)} title="Agent Workflow (⌘B)">
+              <Bot className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={toggleFocus} title="Focus mode (⌘.)">
               {focus ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -579,6 +593,8 @@ function ChatPage() {
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} actions={commandActions} />
       <PromptLibraryDialog open={libraryOpen} onOpenChange={setLibraryOpen} onPick={(p) => { setSeedPrompt({ text: p.prompt, n: Date.now() }); toast.success(`Loaded: ${p.title}`); }} />
       <PersonaDialog open={personaOpen} onOpenChange={setPersonaOpen} activeId={personaId} onPick={(p) => { setPersonaId(p.id); toast.success(`Persona → ${p.emoji} ${p.name}`); }} />
+      <EnsembleDialog open={ensembleOpen} onOpenChange={setEnsembleOpen} seedPrompt={active?.messages.filter(m => m.role === "user").slice(-1)[0]?.content} onUseAnswer={(t) => setSeedPrompt({ text: t, n: Date.now() })} />
+      <AgentDialog open={agentOpen} onOpenChange={setAgentOpen} defaultModel={model} onUseAnswer={(t) => handleSend(t)} />
     </div>
   );
 }
