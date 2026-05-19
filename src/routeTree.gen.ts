@@ -15,6 +15,7 @@ import { Route as ApiPublicProvidersRouteImport } from './routes/api/public/prov
 import { Route as ApiPublicImageRouteImport } from './routes/api/public/image'
 import { Route as ApiPublicEnsembleRouteImport } from './routes/api/public/ensemble'
 import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
+import { Route as ApiPublicAgentRouteImport } from './routes/api/public/agent'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,9 +47,15 @@ const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
   path: '/api/public/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentRoute = ApiPublicAgentRouteImport.update({
+  id: '/api/public/agent',
+  path: '/api/public/agent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/agent': typeof ApiPublicAgentRoute
   '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/ensemble': typeof ApiPublicEnsembleRoute
   '/api/public/image': typeof ApiPublicImageRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/agent': typeof ApiPublicAgentRoute
   '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/ensemble': typeof ApiPublicEnsembleRoute
   '/api/public/image': typeof ApiPublicImageRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/agent': typeof ApiPublicAgentRoute
   '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/ensemble': typeof ApiPublicEnsembleRoute
   '/api/public/image': typeof ApiPublicImageRoute
@@ -76,6 +85,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/api/public/agent'
     | '/api/public/chat'
     | '/api/public/ensemble'
     | '/api/public/image'
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/api/public/agent'
     | '/api/public/chat'
     | '/api/public/ensemble'
     | '/api/public/image'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/api/public/agent'
     | '/api/public/chat'
     | '/api/public/ensemble'
     | '/api/public/image'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicAgentRoute: typeof ApiPublicAgentRoute
   ApiPublicChatRoute: typeof ApiPublicChatRoute
   ApiPublicEnsembleRoute: typeof ApiPublicEnsembleRoute
   ApiPublicImageRoute: typeof ApiPublicImageRoute
@@ -152,11 +165,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent': {
+      id: '/api/public/agent'
+      path: '/api/public/agent'
+      fullPath: '/api/public/agent'
+      preLoaderRoute: typeof ApiPublicAgentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicAgentRoute: ApiPublicAgentRoute,
   ApiPublicChatRoute: ApiPublicChatRoute,
   ApiPublicEnsembleRoute: ApiPublicEnsembleRoute,
   ApiPublicImageRoute: ApiPublicImageRoute,
