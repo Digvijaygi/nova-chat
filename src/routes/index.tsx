@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Menu, Sparkles, Zap, Brain, Code2, Palette, Download, Bookmark, Globe, Command, BookOpen, Drama, Focus, Eye, EyeOff, Layers, Bot, Mic, MicOff, Volume2, VolumeX, Copy, Check, Share2, ArrowUp, ArrowDown, Trash2, Edit2, RefreshCw, MoreVertical, Settings, MoonStar, Sun, Cloud, Shield, Cpu, Rocket, Gem, Crown, Flame, Wind, Droplets, Activity, Database, Network, Lock, Users, Target, Compass, Map, Clock, Calendar, Star, Heart, ThumbsUp, ThumbsDown, MessageSquare, Plus, X, Search, Filter, SortAsc, SortDesc, Grid, List, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen, Monitor, Smartphone, Tablet, ZapOff, Zap as ZapIcon, Sparkle } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Menu, Sparkles, Zap, Brain, Code2, Palette, Download, Bookmark, Globe, Command, BookOpen, Drama, Focus, Eye, EyeOff, Layers, Bot, Mic, MicOff, Volume2, VolumeX, Copy, Check, Share2, ArrowUp, ArrowDown, Trash2, Edit2, RefreshCw, MoreVertical, Settings, MoonStar, Sun, Cloud, Shield, Cpu, Rocket, Gem, Crown, Flame, Wind, Droplets, Activity, Database, Network, Lock, Users, Target, Compass, Map, Clock, Calendar, Star, Heart, ThumbsUp, ThumbsDown, MessageSquare, Plus, X, Search, Filter, SortAsc, SortDesc, Grid, List, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen, Monitor, Smartphone, Tablet, ZapOff, Zap as ZapIcon, Sparkle, Palette as PaletteIcon, Github, Twitter, Linkedin, Mail, Bell, BellOff, LockKeyhole, EyeScan, Fingerprint, Hourglass, BatteryFull, Wifi, WifiOff, Bluetooth, BluetoothOff, Airplay, Radio, RadioTower, Telescope, Microscope, Atom, Orbit, Flower2, Snowflake, CloudLightning, CloudRain, CloudSun, CloudMoon, SunMoon, Stars, Meteor, Sparkles as SparklesIcon, CircleDot, CircleDashed, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/chat/Sidebar";
 import { ChatMessage } from "@/components/chat/ChatMessage";
@@ -30,6 +30,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const Route = createFileRoute("/")({
   component: ChatPage,
@@ -80,6 +83,568 @@ const NEW_MODES = [
   { id: "philosophical", name: "📜 Philosopher", icon: Compass, desc: "Deep thinking" },
   { id: "humor", name: "😄 Witty", icon: Flame, desc: "Humor & wit" },
 ];
+
+const BACKGROUND_ANIMATIONS = [
+  { id: "aurora", name: "Aurora Borealis", icon: CloudSun, description: "Flowing northern lights" },
+  { id: "particles", name: "Floating Particles", icon: CircleDot, description: "Dynamic particle system" },
+  { id: "matrix", name: "Matrix Rain", icon: Database, description: "Digital rain effect" },
+  { id: "waves", name: "Sound Waves", icon: Radio, description: "Audio visualization" },
+  { id: "fireflies", name: "Fireflies", icon: Flower2, description: "Glowing fireflies" },
+  { id: "nebula", name: "Nebula Cloud", icon: Orbit, description: "Cosmic nebula" },
+  { id: "circuit", name: "Neon Circuit", icon: Network, description: "Glowing circuits" },
+  { id: "gradient", name: "Animated Gradient", icon: PaletteIcon, description: "Smooth color transitions" },
+];
+
+// Advanced Particle Background Component
+const AdvancedBackground = ({ type, accentColor }: { type: string; accentColor: string }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number>();
+  const particlesRef = useRef<Array<{
+    x: number; y: number; vx: number; vy: number; size: number;
+    alpha: number; color: string; glow: number; pulse: number;
+  }>>([]);
+  const timeRef = useRef(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Initialize particles based on type
+    const initParticles = () => {
+      const particles = [];
+      const particleCount = type === "particles" ? 150 : type === "fireflies" ? 60 : type === "matrix" ? 100 : type === "circuit" ? 80 : 100;
+      
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: (Math.random() - 0.5) * 0.8,
+          size: type === "fireflies" ? 2 + Math.random() * 4 : 1 + Math.random() * 3,
+          alpha: 0.3 + Math.random() * 0.5,
+          color: `hsl(${Math.random() * 60 + 260}, 70%, 60%)`,
+          glow: 0.5 + Math.random(),
+          pulse: Math.random() * Math.PI * 2,
+        });
+      }
+      particlesRef.current = particles;
+    };
+
+    initParticles();
+
+    const drawMatrix = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+      const cols = Math.floor(width / 20);
+      const drops: number[] = new Array(cols).fill(1);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = `hsl(${accentColor}, 70%, 50%)`;
+      ctx.font = "15px monospace";
+      for (let i = 0; i < drops.length; i++) {
+        const text = String.fromCharCode(0x30A0 + Math.random() * 96);
+        ctx.fillText(text, i * 20, drops[i] * 20);
+        if (drops[i] * 20 > height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    };
+
+    const drawWaves = (ctx: CanvasRenderingContext2D, width: number, height: number, time: number) => {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        const amplitude = 40 + i * 10;
+        const frequency = 0.005 + i * 0.002;
+        for (let x = 0; x < width; x += 5) {
+          const y = height / 2 + Math.sin(x * frequency + time * 0.005) * amplitude + Math.sin(x * 0.01 + i) * 20;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = `hsla(${accentColor}, 70%, 60%, ${0.3 - i * 0.05})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    };
+
+    const drawNebula = (ctx: CanvasRenderingContext2D, width: number, height: number, time: number) => {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, width, height);
+      const gradient = ctx.createLinearGradient(
+        Math.sin(time * 0.0005) * width * 0.2 + width * 0.3,
+        Math.cos(time * 0.0003) * height * 0.2 + height * 0.3,
+        Math.sin(time * 0.0007 + 2) * width * 0.2 + width * 0.7,
+        Math.cos(time * 0.0004 + 1) * height * 0.2 + height * 0.7
+      );
+      gradient.addColorStop(0, `hsla(${accentColor}, 80%, 30%, 0.3)`);
+      gradient.addColorStop(0.5, `hsla(${accentColor + 40}, 70%, 40%, 0.2)`);
+      gradient.addColorStop(1, `hsla(${accentColor - 40}, 80%, 25%, 0.3)`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+    };
+
+    const drawCircuit = (ctx: CanvasRenderingContext2D, width: number, height: number, time: number) => {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = `hsla(${accentColor}, 70%, 60%, 0.4)`;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 20; i++) {
+        const x = (Math.sin(time * 0.001 + i) * 0.5 + 0.5) * width;
+        const y = (Math.cos(time * 0.0008 + i * 2) * 0.5 + 0.5) * height;
+        ctx.beginPath();
+        ctx.arc(x, y, 3 + Math.sin(time * 0.002 + i) * 2, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${accentColor}, 70%, 60%, 0.3)`;
+        ctx.fill();
+      }
+    };
+
+    const drawParticles = (ctx: CanvasRenderingContext2D, width: number, height: number, time: number) => {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, width, height);
+      
+      particlesRef.current.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+        
+        const glowAlpha = 0.3 + Math.sin(time * 0.002 + p.pulse) * 0.2;
+        ctx.shadowBlur = 10 * p.glow;
+        ctx.shadowColor = `hsla(${accentColor}, 80%, 60%, ${glowAlpha})`;
+        ctx.fillStyle = `hsla(${accentColor}, 70%, 60%, ${p.alpha})`;
+        ctx.beginPath();
+        if (type === "fireflies") {
+          ctx.arc(p.x, p.y, p.size + Math.sin(time * 0.005 + p.pulse) * 1, 0, Math.PI * 2);
+        } else {
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      });
+      ctx.shadowBlur = 0;
+    };
+
+    const animate = () => {
+      if (!canvas || !ctx) return;
+      const width = canvas.width;
+      const height = canvas.height;
+      const time = Date.now();
+      
+      if (type === "matrix") drawMatrix(ctx, width, height);
+      else if (type === "waves") drawWaves(ctx, width, height, time);
+      else if (type === "nebula") drawNebula(ctx, width, height, time);
+      else if (type === "circuit") drawCircuit(ctx, width, height, time);
+      else if (type === "particles" || type === "fireflies") drawParticles(ctx, width, height, time);
+      else if (type === "aurora") {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, width, height);
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, `hsla(${accentColor}, 80%, 50%, 0.15)`);
+        gradient.addColorStop(0.5, `hsla(${accentColor + 60}, 70%, 50%, 0.1)`);
+        gradient.addColorStop(1, `hsla(${accentColor - 60}, 80%, 40%, 0.15)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+      } else if (type === "gradient") {
+        const gradient = ctx.createLinearGradient(
+          Math.sin(time * 0.0003) * width * 0.2 + width * 0.5,
+          Math.cos(time * 0.0002) * height * 0.2 + height * 0.5,
+          Math.sin(time * 0.0004 + Math.PI) * width * 0.2 + width * 0.5,
+          Math.cos(time * 0.0003 + Math.PI) * height * 0.2 + height * 0.5
+        );
+        gradient.addColorStop(0, `hsla(${accentColor}, 70%, 20%, 0.4)`);
+        gradient.addColorStop(0.5, `hsla(${accentColor + 40}, 60%, 15%, 0.3)`);
+        gradient.addColorStop(1, `hsla(${accentColor - 40}, 70%, 20%, 0.4)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+      }
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animate();
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      window.removeEventListener("resize", resize);
+    };
+  }, [type, accentColor]);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" style={{ opacity: 0.7 }} />;
+};
+
+// Enhanced Settings Panel with more features
+const EnhancedSettingsPanel = ({
+  open, onOpenChange,
+  // Existing props
+  model, setModel, mode, setMode, autoSpeak, setAutoSpeak,
+  temperature, setTemperature, customSystem, setCustomSystem,
+  accent, setAccent, fontSize, setFontSize, showTimestamps, setShowTimestamps,
+  noBs, setNoBs, soundOnDone, setSoundOnDone, voiceLang, setVoiceLang,
+  onExportAll, onImportAll, onClearAll,
+  // New props
+  darkMode, setDarkMode, glowEffect, setGlowEffect, particlesEnabled, setParticlesEnabled,
+  typewriterEffect, setTypewriterEffect, vibrationEnabled, setVibrationEnabled,
+  autoSummarize, setAutoSummarize, smartContext, setSmartContext,
+  responseSpeed, setResponseSpeed, maxTokens, setMaxTokens,
+  showWordCount, setShowWordCount, showTypingIndicator, setShowTypingIndicator,
+  compactView, setCompactView, animationsEnabled, setAnimationsEnabled,
+  voiceInputEnabled, setVoiceInputEnabled, ttsEnabled, setTtsEnabled,
+  quickReplies, setQuickReplies, messageEffects, setMessageEffects,
+  copyConfirmation, setCopyConfirmation, backgroundAnimation, setBackgroundAnimation,
+  autoSave, setAutoSave, autoScroll, setAutoScroll, emojiReactions, setEmojiReactions,
+  codeHighlighting, setCodeHighlighting, markdownRendering, setMarkdownRendering,
+  showMetadata, setShowMetadata, showAvatars, setShowAvatars, enterToSend, setEnterToSend,
+  notificationsEnabled, setNotificationsEnabled, desktopNotifications, setDesktopNotifications,
+  soundVolume, setSoundVolume, hapticFeedback, setHapticFeedback, offlineMode, setOfflineMode,
+  autoClearHistory, setAutoClearHistory, clearHistoryDays, setClearHistoryDays,
+}) => {
+  const [activeTab, setActiveTab] = useState("appearance");
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="text-2xl flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Advanced Settings
+          </DialogTitle>
+        </DialogHeader>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="grid grid-cols-6 w-full">
+            <TabsTrigger value="appearance">🎨 Appearance</TabsTrigger>
+            <TabsTrigger value="chat">💬 Chat</TabsTrigger>
+            <TabsTrigger value="voice">🎤 Voice & Sound</TabsTrigger>
+            <TabsTrigger value="ai">🧠 AI & Models</TabsTrigger>
+            <TabsTrigger value="privacy">🔒 Privacy</TabsTrigger>
+            <TabsTrigger value="advanced">⚡ Advanced</TabsTrigger>
+          </TabsList>
+          <ScrollArea className="flex-1 pr-4">
+            <TabsContent value="appearance" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Theme & Colors</CardTitle>
+                  <CardDescription>Customize the look and feel</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Dark Mode</Label>
+                    <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Glow Effects</Label>
+                    <Switch checked={glowEffect} onCheckedChange={setGlowEffect} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Accent Color</Label>
+                    <Select value={accent} onValueChange={setAccent}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(ACCENTS).map(([key, val]) => (
+                          <SelectItem key={key} value={key}>{val.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Font Size: {fontSize}px</Label>
+                    <Slider value={[fontSize]} onValueChange={([v]) => setFontSize(v)} min={12} max={24} step={1} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Background Animation</Label>
+                    <Select value={backgroundAnimation} onValueChange={setBackgroundAnimation}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {BACKGROUND_ANIMATIONS.map(anim => (
+                          <SelectItem key={anim.id} value={anim.id}>
+                            <div className="flex items-center gap-2">
+                              <anim.icon className="h-4 w-4" />
+                              {anim.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {BACKGROUND_ANIMATIONS.find(a => a.id === backgroundAnimation)?.description}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Compact View</Label>
+                    <Switch checked={compactView} onCheckedChange={setCompactView} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Animations</Label>
+                    <Switch checked={animationsEnabled} onCheckedChange={setAnimationsEnabled} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Show Avatars</Label>
+                    <Switch checked={showAvatars} onCheckedChange={setShowAvatars} />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="chat" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Chat Behavior</CardTitle>
+                  <CardDescription>Customize how messages are displayed and handled</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Show Timestamps</Label>
+                    <Switch checked={showTimestamps} onCheckedChange={setShowTimestamps} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Show Word Count</Label>
+                    <Switch checked={showWordCount} onCheckedChange={setShowWordCount} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Typing Indicator</Label>
+                    <Switch checked={showTypingIndicator} onCheckedChange={setShowTypingIndicator} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Quick Replies</Label>
+                    <Switch checked={quickReplies} onCheckedChange={setQuickReplies} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Emoji Reactions</Label>
+                    <Switch checked={emojiReactions} onCheckedChange={setEmojiReactions} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Message Effects</Label>
+                    <Switch checked={messageEffects} onCheckedChange={setMessageEffects} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Copy Confirmation</Label>
+                    <Switch checked={copyConfirmation} onCheckedChange={setCopyConfirmation} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Code Highlighting</Label>
+                    <Switch checked={codeHighlighting} onCheckedChange={setCodeHighlighting} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Markdown Rendering</Label>
+                    <Switch checked={markdownRendering} onCheckedChange={setMarkdownRendering} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Show Message Metadata</Label>
+                    <Switch checked={showMetadata} onCheckedChange={setShowMetadata} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Enter to Send</Label>
+                    <Switch checked={enterToSend} onCheckedChange={setEnterToSend} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Auto-scroll to bottom</Label>
+                    <Switch checked={autoScroll} onCheckedChange={setAutoScroll} />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="voice" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Voice & Sound</CardTitle>
+                  <CardDescription>Configure audio and voice settings</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Voice Input</Label>
+                    <Switch checked={voiceInputEnabled} onCheckedChange={setVoiceInputEnabled} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Text-to-Speech</Label>
+                    <Switch checked={ttsEnabled} onCheckedChange={setTtsEnabled} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Auto-speak responses</Label>
+                    <Switch checked={autoSpeak} onCheckedChange={setAutoSpeak} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Voice Language</Label>
+                    <Select value={voiceLang} onValueChange={setVoiceLang}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en-US">English (US)</SelectItem>
+                        <SelectItem value="en-GB">English (UK)</SelectItem>
+                        <SelectItem value="es-ES">Spanish</SelectItem>
+                        <SelectItem value="fr-FR">French</SelectItem>
+                        <SelectItem value="de-DE">German</SelectItem>
+                        <SelectItem value="ja-JP">Japanese</SelectItem>
+                        <SelectItem value="ko-KR">Korean</SelectItem>
+                        <SelectItem value="zh-CN">Chinese</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Speech Speed: {responseSpeed}x</Label>
+                    <Slider value={[responseSpeed]} onValueChange={([v]) => setResponseSpeed(v)} min={0.5} max={2} step={0.05} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Sound on completion</Label>
+                    <Switch checked={soundOnDone} onCheckedChange={setSoundOnDone} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sound Volume: {soundVolume}%</Label>
+                    <Slider value={[soundVolume]} onValueChange={([v]) => setSoundVolume(v)} min={0} max={100} step={5} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Haptic Feedback</Label>
+                    <Switch checked={hapticFeedback} onCheckedChange={setHapticFeedback} />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="ai" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">AI Models & Intelligence</CardTitle>
+                  <CardDescription>Configure AI behavior and capabilities</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Model</Label>
+                    <Select value={model} onValueChange={setModel}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {MODELS.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Mode</Label>
+                    <Select value={mode} onValueChange={setMode}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {NEW_MODES.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Temperature: {temperature}</Label>
+                    <Slider value={[temperature]} onValueChange={([v]) => setTemperature(v)} min={0} max={2} step={0.05} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Max Tokens: {maxTokens}</Label>
+                    <Slider value={[maxTokens]} onValueChange={([v]) => setMaxTokens(v)} min={512} max={8192} step={256} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>No BS Mode</Label>
+                    <Switch checked={noBs} onCheckedChange={setNoBs} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Smart Context</Label>
+                    <Switch checked={smartContext} onCheckedChange={setSmartContext} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Auto-summarize long chats</Label>
+                    <Switch checked={autoSummarize} onCheckedChange={setAutoSummarize} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Typewriter Effect</Label>
+                    <Switch checked={typewriterEffect} onCheckedChange={setTypewriterEffect} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Custom System Prompt</Label>
+                    <Textarea 
+                      value={customSystem} 
+                      onChange={(e) => setCustomSystem(e.target.value)} 
+                      placeholder="Custom instructions for the AI..."
+                      rows={3}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="privacy" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Privacy & Data</CardTitle>
+                  <CardDescription>Control your data and privacy settings</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Offline Mode</Label>
+                    <Switch checked={offlineMode} onCheckedChange={setOfflineMode} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Desktop Notifications</Label>
+                    <Switch checked={desktopNotifications} onCheckedChange={setDesktopNotifications} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Auto-save conversations</Label>
+                    <Switch checked={autoSave} onCheckedChange={setAutoSave} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Auto-clear history</Label>
+                    <Switch checked={autoClearHistory} onCheckedChange={setAutoClearHistory} />
+                  </div>
+                  {autoClearHistory && (
+                    <div className="space-y-2">
+                      <Label>Clear after days: {clearHistoryDays}</Label>
+                      <Slider value={[clearHistoryDays]} onValueChange={([v]) => setClearHistoryDays(v)} min={1} max={90} step={1} />
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={onExportAll} className="flex-1">Export All Chats</Button>
+                    <Button variant="outline" onClick={onImportAll} className="flex-1">Import Chats</Button>
+                  </div>
+                  <Button variant="destructive" onClick={onClearAll}>Clear All Data</Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="advanced" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Advanced Settings</CardTitle>
+                  <CardDescription>Experimental and power user features</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Vibration Feedback</Label>
+                    <Switch checked={vibrationEnabled} onCheckedChange={setVibrationEnabled} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Particle Effects</Label>
+                    <Switch checked={particlesEnabled} onCheckedChange={setParticlesEnabled} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Notifications</Label>
+                    <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Developer Mode</Label>
+                    <Button variant="outline" onClick={() => toast.success("Developer mode activated! 🚀")}>
+                      Enable Developer Mode
+                    </Button>
+                  </div>
+                  <Separator />
+                  <div className="text-xs text-muted-foreground">
+                    <p>Version 3.0.0-beta</p>
+                    <p>Build: 2024.001</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </ScrollArea>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 function useLS<T>(key: string, initial: T): [T, (v: T) => void] {
   const [v, setV] = useState<T>(initial);
@@ -159,7 +724,6 @@ function ChatPage() {
   const [animationsEnabled, setAnimationsEnabled] = useLS<boolean>("dksai.animations", true);
   const [voiceInputEnabled, setVoiceInputEnabled] = useLS<boolean>("dksai.voiceInput", true);
   const [ttsEnabled, setTtsEnabled] = useLS<boolean>("dksai.tts", true);
-  const [ttsVoice, setTtsVoice] = useLS<string>("dksai.ttsVoice", "google-US-English");
   const [quickReplies, setQuickReplies] = useLS<boolean>("dksai.quickReplies", true);
   const [messageEffects, setMessageEffects] = useLS<boolean>("dksai.messageEffects", true);
   const [copyConfirmation, setCopyConfirmation] = useLS<boolean>("dksai.copyConfirmation", true);
@@ -177,6 +741,24 @@ function ChatPage() {
   const [tokenUsage, setTokenUsage] = useState<number | null>(null);
   const [contextLength, setContextLength] = useState<number>(0);
   const [vibrationPattern, setVibrationPattern] = useState<number[]>([50, 30, 50]);
+  
+  // New advanced settings
+  const [backgroundAnimation, setBackgroundAnimation] = useLS<string>("dksai.backgroundAnim", "aurora");
+  const [autoSave, setAutoSave] = useLS<boolean>("dksai.autoSave", true);
+  const [autoScroll, setAutoScroll] = useLS<boolean>("dksai.autoScroll", true);
+  const [emojiReactions, setEmojiReactions] = useLS<boolean>("dksai.emojiReactions", true);
+  const [codeHighlighting, setCodeHighlighting] = useLS<boolean>("dksai.codeHighlighting", true);
+  const [markdownRendering, setMarkdownRendering] = useLS<boolean>("dksai.markdownRendering", true);
+  const [showMetadata, setShowMetadata] = useLS<boolean>("dksai.showMetadata", false);
+  const [showAvatars, setShowAvatars] = useLS<boolean>("dksai.showAvatars", true);
+  const [enterToSend, setEnterToSend] = useLS<boolean>("dksai.enterToSend", true);
+  const [notificationsEnabled, setNotificationsEnabled] = useLS<boolean>("dksai.notifications", true);
+  const [desktopNotifications, setDesktopNotifications] = useLS<boolean>("dksai.desktopNotifications", false);
+  const [soundVolume, setSoundVolume] = useLS<number>("dksai.soundVolume", 50);
+  const [hapticFeedback, setHapticFeedback] = useLS<boolean>("dksai.hapticFeedback", false);
+  const [offlineMode, setOfflineMode] = useLS<boolean>("dksai.offlineMode", false);
+  const [autoClearHistory, setAutoClearHistory] = useLS<boolean>("dksai.autoClearHistory", false);
+  const [clearHistoryDays, setClearHistoryDays] = useLS<number>("dksai.clearHistoryDays", 30);
 
   const persona = PERSONAS.find((p) => p.id === personaId) ?? PERSONAS[0];
 
@@ -229,8 +811,10 @@ function ChatPage() {
   }, [animationsEnabled]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: animationsEnabled ? "smooth" : "auto" });
-  }, [active?.messages.length, streamingId, animationsEnabled]);
+    if (autoScroll && scrollRef.current) {
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: animationsEnabled ? "smooth" : "auto" });
+    }
+  }, [active?.messages.length, streamingId, animationsEnabled, autoScroll]);
 
   // Simulate typing effect
   useEffect(() => {
@@ -244,6 +828,29 @@ function ChatPage() {
     }
   }, [streamingId, active?.messages, typewriterEffect]);
 
+  // Auto-save effect
+  useEffect(() => {
+    if (autoSave && active) {
+      const timer = setTimeout(() => {
+        localStorage.setItem(`chat_${active.id}`, JSON.stringify(active.messages));
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [active?.messages, autoSave, active]);
+
+  // Auto-clear history effect
+  useEffect(() => {
+    if (autoClearHistory && clearHistoryDays > 0) {
+      const cutoff = Date.now() - (clearHistoryDays * 24 * 60 * 60 * 1000);
+      conversations.forEach(conv => {
+        const lastMessage = conv.messages[conv.messages.length - 1];
+        if (lastMessage && lastMessage.createdAt < cutoff) {
+          deleteConversation(conv.id);
+        }
+      });
+    }
+  }, [autoClearHistory, clearHistoryDays, conversations]);
+
   const speak = (text: string) => {
     if (!ttsEnabled || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
@@ -254,7 +861,7 @@ function ChatPage() {
   };
 
   const vibrate = (pattern: number | number[]) => {
-    if (vibrationEnabled && "vibrate" in navigator) {
+    if (hapticFeedback && vibrationEnabled && "vibrate" in navigator) {
       navigator.vibrate(pattern);
     }
   };
@@ -322,6 +929,9 @@ function ChatPage() {
       }
       if (autoSpeak && acc) speak(acc);
       if (soundOnDone) { beep(); vibrate(vibrationPattern); }
+      if (desktopNotifications && Notification.permission === "granted") {
+        new Notification("dksai Response", { body: "Your message has been answered!" });
+      }
       if (autoSummarize && active?.messages.length > 10) {
         setTimeout(() => summarizeConversation(convId), 1000);
       }
@@ -584,6 +1194,13 @@ function ChatPage() {
     }
   };
 
+  // Request notification permission
+  useEffect(() => {
+    if (desktopNotifications && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, [desktopNotifications]);
+
   // Enhanced keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -630,14 +1247,18 @@ function ChatPage() {
     ...PERSONAS.map((p) => ({ id: `persona-${p.id}`, label: `${p.emoji} ${p.name}`, hint: p.desc, group: "Personas" as const, run: () => { setPersonaId(p.id); toast.success(`Persona: ${p.name}`); }, icon: Drama })),
   ];
 
+  const accentNumber = parseInt(ACCENTS[accent]?.primary.split(" ")[0]) || 260;
+
   return (
     <TooltipProvider>
       <div className={`relative flex h-dvh w-full overflow-hidden ${darkMode ? "dark" : ""}`}>
-        {particlesEnabled && <AuroraBackground />}
+        {particlesEnabled && backgroundAnimation !== "none" && (
+          <AdvancedBackground type={backgroundAnimation} accentColor={accentNumber.toString()} />
+        )}
         
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 flex gap-2 pointer-events-none">
           {isTyping && showTypingIndicator && (
-            <div className="bg-background/80 backdrop-blur-sm rounded-full px-3 py-1 text-xs flex items-center gap-1 border border-primary/20">
+            <div className="bg-background/80 backdrop-blur-sm rounded-full px-3 py-1 text-xs flex items-center gap-1 border border-primary/20 animate-in fade-in slide-in-from-top-2">
               <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
               <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
               <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -660,7 +1281,7 @@ function ChatPage() {
           onToggleExpand={() => setSidebarExpanded(!sidebarExpanded)}
         />
 
-        <main className="flex min-w-0 flex-1 flex-col">
+        <main className="flex min-w-0 flex-1 flex-col relative z-10">
           <header className="flex items-center gap-2 border-b border-border/60 px-3 py-2 backdrop-blur-sm sticky top-0 z-10 bg-background/80">
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSidebarOpen(true)}>
               <Menu className="h-5 w-5" />
@@ -805,12 +1426,12 @@ function ChatPage() {
                       onSpeak={ttsEnabled ? () => speak(m.content) : undefined}
                       onCopy={() => handleCopy(m.content, m.id)}
                       onShare={() => handleShare(m.content)}
-                      onAddEmoji={(emoji) => handleAddEmoji(emoji, m.id)}
+                      onAddEmoji={emojiReactions ? (emoji) => handleAddEmoji(emoji, m.id) : undefined}
                       copied={copiedId === m.id}
                     />
-                    {quickReplies && idx === visibleMessages.length - 1 && m.role === "assistant" && m.content && !busy && (
+                    {quickReplies && idx === visibleMessages.length - 1 && m.role === "assistant" && m.content && !busy && emojiReactions && (
                       <div className="flex gap-2 mt-2 px-4">
-                        {["👍", "👎", "💡", "❓", "🎯"].map(emoji => (
+                        {["👍", "👎", "💡", "❓", "🎯", "✨", "🔥", "🌟"].map(emoji => (
                           <button
                             key={emoji}
                             onClick={() => handleAddEmoji(emoji, m.id)}
@@ -823,7 +1444,7 @@ function ChatPage() {
                     )}
                   </div>
                 ))}
-                {responseTime && tokenUsage && (
+                {responseTime && tokenUsage && showMetadata && (
                   <div className="text-center text-xs text-muted-foreground py-2">
                     ⚡ {responseTime}ms • {tokenUsage} tokens • 📊 {contextLength} context
                   </div>
@@ -852,10 +1473,11 @@ function ChatPage() {
             voiceLang={voiceLang} 
             seed={seedPrompt}
             voiceEnabled={voiceInputEnabled}
+            enterToSend={enterToSend}
           />
         </main>
 
-        <SettingsPanel
+        <EnhancedSettingsPanel
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
           model={model} setModel={setModel}
@@ -872,7 +1494,6 @@ function ChatPage() {
           onExportAll={exportAll}
           onImportAll={importAll}
           onClearAll={handleClearAll}
-          // New settings
           darkMode={darkMode} setDarkMode={setDarkMode}
           glowEffect={glowEffect} setGlowEffect={setGlowEffect}
           particlesEnabled={particlesEnabled} setParticlesEnabled={setParticlesEnabled}
@@ -891,6 +1512,22 @@ function ChatPage() {
           quickReplies={quickReplies} setQuickReplies={setQuickReplies}
           messageEffects={messageEffects} setMessageEffects={setMessageEffects}
           copyConfirmation={copyConfirmation} setCopyConfirmation={setCopyConfirmation}
+          backgroundAnimation={backgroundAnimation} setBackgroundAnimation={setBackgroundAnimation}
+          autoSave={autoSave} setAutoSave={setAutoSave}
+          autoScroll={autoScroll} setAutoScroll={setAutoScroll}
+          emojiReactions={emojiReactions} setEmojiReactions={setEmojiReactions}
+          codeHighlighting={codeHighlighting} setCodeHighlighting={setCodeHighlighting}
+          markdownRendering={markdownRendering} setMarkdownRendering={setMarkdownRendering}
+          showMetadata={showMetadata} setShowMetadata={setShowMetadata}
+          showAvatars={showAvatars} setShowAvatars={setShowAvatars}
+          enterToSend={enterToSend} setEnterToSend={setEnterToSend}
+          notificationsEnabled={notificationsEnabled} setNotificationsEnabled={setNotificationsEnabled}
+          desktopNotifications={desktopNotifications} setDesktopNotifications={setDesktopNotifications}
+          soundVolume={soundVolume} setSoundVolume={setSoundVolume}
+          hapticFeedback={hapticFeedback} setHapticFeedback={setHapticFeedback}
+          offlineMode={offlineMode} setOfflineMode={setOfflineMode}
+          autoClearHistory={autoClearHistory} setAutoClearHistory={setAutoClearHistory}
+          clearHistoryDays={clearHistoryDays} setClearHistoryDays={setClearHistoryDays}
         />
 
         <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} actions={commandActions} />
