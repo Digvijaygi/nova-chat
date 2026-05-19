@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicTitleRouteImport } from './routes/api/public/title'
 import { Route as ApiPublicProvidersRouteImport } from './routes/api/public/providers'
 import { Route as ApiPublicImageRouteImport } from './routes/api/public/image'
+import { Route as ApiPublicEnsembleRouteImport } from './routes/api/public/ensemble'
 import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const ApiPublicImageRoute = ApiPublicImageRouteImport.update({
   path: '/api/public/image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEnsembleRoute = ApiPublicEnsembleRouteImport.update({
+  id: '/api/public/ensemble',
+  path: '/api/public/ensemble',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
   id: '/api/public/chat',
   path: '/api/public/chat',
@@ -44,6 +50,7 @@ const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/public/chat': typeof ApiPublicChatRoute
+  '/api/public/ensemble': typeof ApiPublicEnsembleRoute
   '/api/public/image': typeof ApiPublicImageRoute
   '/api/public/providers': typeof ApiPublicProvidersRoute
   '/api/public/title': typeof ApiPublicTitleRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/public/chat': typeof ApiPublicChatRoute
+  '/api/public/ensemble': typeof ApiPublicEnsembleRoute
   '/api/public/image': typeof ApiPublicImageRoute
   '/api/public/providers': typeof ApiPublicProvidersRoute
   '/api/public/title': typeof ApiPublicTitleRoute
@@ -59,6 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/public/chat': typeof ApiPublicChatRoute
+  '/api/public/ensemble': typeof ApiPublicEnsembleRoute
   '/api/public/image': typeof ApiPublicImageRoute
   '/api/public/providers': typeof ApiPublicProvidersRoute
   '/api/public/title': typeof ApiPublicTitleRoute
@@ -68,6 +77,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/api/public/chat'
+    | '/api/public/ensemble'
     | '/api/public/image'
     | '/api/public/providers'
     | '/api/public/title'
@@ -75,6 +85,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/api/public/chat'
+    | '/api/public/ensemble'
     | '/api/public/image'
     | '/api/public/providers'
     | '/api/public/title'
@@ -82,6 +93,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/api/public/chat'
+    | '/api/public/ensemble'
     | '/api/public/image'
     | '/api/public/providers'
     | '/api/public/title'
@@ -90,6 +102,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiPublicChatRoute: typeof ApiPublicChatRoute
+  ApiPublicEnsembleRoute: typeof ApiPublicEnsembleRoute
   ApiPublicImageRoute: typeof ApiPublicImageRoute
   ApiPublicProvidersRoute: typeof ApiPublicProvidersRoute
   ApiPublicTitleRoute: typeof ApiPublicTitleRoute
@@ -125,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ensemble': {
+      id: '/api/public/ensemble'
+      path: '/api/public/ensemble'
+      fullPath: '/api/public/ensemble'
+      preLoaderRoute: typeof ApiPublicEnsembleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/chat': {
       id: '/api/public/chat'
       path: '/api/public/chat'
@@ -138,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiPublicChatRoute: ApiPublicChatRoute,
+  ApiPublicEnsembleRoute: ApiPublicEnsembleRoute,
   ApiPublicImageRoute: ApiPublicImageRoute,
   ApiPublicProvidersRoute: ApiPublicProvidersRoute,
   ApiPublicTitleRoute: ApiPublicTitleRoute,
