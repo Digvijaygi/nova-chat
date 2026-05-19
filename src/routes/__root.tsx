@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect, useState, createContext, useContext } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { 
   Activity, 
   Battery, 
@@ -82,6 +81,7 @@ import {
   Train,
   Bike,
   Footprints,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -154,6 +154,108 @@ export const useRoot = () => {
   if (!context) throw new Error("useRoot must be used within RootProvider");
   return context;
 };
+
+// ============ CSS ANIMATIONS ============
+
+const animationStyles = `
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  .animate-bounce {
+    animation: bounce 0.5s ease-in-out;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin 1s linear infinite;
+  }
+
+  .reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .high-contrast {
+    --primary: 0 100% 50%;
+    --ring: 0 100% 50%;
+  }
+
+  .ultra-dark {
+    --background: 0 0% 3%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 240 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 240 100% 60%;
+    --accent-foreground: 0 0% 100%;
+    --border: 0 0% 15%;
+  }
+`;
 
 // ============ CUSTOM HOOKS ============
 
@@ -241,19 +343,26 @@ function usePerformanceMonitor(): PerformanceMetrics {
     animationId = requestAnimationFrame(measureFPS);
 
     // Monitor long tasks
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (entry.duration > 50) {
-          setMetrics(prev => ({ ...prev, renderTime: Math.max(prev.renderTime, entry.duration) }));
-        }
+    if (typeof PerformanceObserver !== 'undefined') {
+      try {
+        const observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.duration > 50) {
+              setMetrics(prev => ({ ...prev, renderTime: Math.max(prev.renderTime, entry.duration) }));
+            }
+          }
+        });
+        observer.observe({ entryTypes: ["longtask"] });
+        return () => {
+          cancelAnimationFrame(animationId);
+          observer.disconnect();
+        };
+      } catch (e) {
+        console.warn("PerformanceObserver not supported");
       }
-    });
-    observer.observe({ entryTypes: ["longtask"] });
+    }
 
-    return () => {
-      cancelAnimationFrame(animationId);
-      observer.disconnect();
-    };
+    return () => cancelAnimationFrame(animationId);
   }, []);
 
   return metrics;
@@ -517,37 +626,26 @@ function FloatingActionButton() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute bottom-14 right-0 space-y-2"
-          >
-            {actions.map((action, i) => (
-              <motion.button
-                key={action.label}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-                onClick={() => { action.action(); setIsOpen(false); }}
-                className="flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2 text-sm shadow-lg hover:bg-accent transition-all w-32"
-              >
-                {action.icon}
-                {action.label}
-              </motion.button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div className="absolute bottom-14 right-0 space-y-2 animate-slide-in">
+          {actions.map((action, i) => (
+            <button
+              key={action.label}
+              onClick={() => { action.action(); setIsOpen(false); }}
+              className="flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2 text-sm shadow-lg hover:bg-accent transition-all w-32"
+              style={{ animationDelay: `${i * 50}ms`, animation: 'slideInRight 0.2s ease-out forwards' }}
+            >
+              {action.icon}
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
       <Button
         className="h-12 w-12 rounded-full shadow-lg bg-gradient-to-r from-primary to-accent hover:shadow-xl transition-all"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <motion.div animate={{ rotate: isOpen ? 45 : 0 }}>
-          <Plus className="h-5 w-5 text-primary-foreground" />
-        </motion.div>
+        <Plus className={`h-5 w-5 text-primary-foreground transition-transform ${isOpen ? 'rotate-45' : ''}`} />
       </Button>
     </div>
   );
@@ -570,12 +668,7 @@ function KeyboardShortcutsHint() {
   if (!visible) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50 bg-background/95 backdrop-blur-sm rounded-lg border border-border shadow-xl p-4 max-w-md"
-    >
+    <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50 bg-background/95 backdrop-blur-sm rounded-lg border border-border shadow-xl p-4 max-w-md animate-slide-in">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-semibold">Keyboard Shortcuts</h3>
         <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setVisible(false)}>
@@ -591,7 +684,7 @@ function KeyboardShortcutsHint() {
         <div className="flex justify-between"><span>⌘S</span><span className="text-muted-foreground">Speak Last Message</span></div>
         <div className="flex justify-between"><span>?</span><span className="text-muted-foreground">Show Shortcuts</span></div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -603,13 +696,7 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", duration: 0.5 }}
-        >
-          <div className="text-8xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">404</div>
-        </motion.div>
+        <div className="text-8xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4 animate-bounce">404</div>
         <h2 className="text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
@@ -634,7 +721,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <div className="text-6xl mb-4">⚠️</div>
+        <div className="text-6xl mb-4 animate-pulse-slow">⚠️</div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           Something went wrong
         </h1>
@@ -696,18 +783,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.gstatic.com",
         crossOrigin: "anonymous",
       },
-      {
-        rel: "apple-touch-icon",
-        href: "/apple-touch-icon.png",
-      },
-      {
-        rel: "manifest",
-        href: "/manifest.json",
-      },
     ],
     scripts: [
       {
         children: `
+          // Inject animation styles
+          const style = document.createElement('style');
+          style.textContent = ${JSON.stringify(animationStyles)};
+          document.head.appendChild(style);
+          
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(console.error);
           }
@@ -748,6 +832,7 @@ function RootProvider({ children }: { children: React.ReactNode }) {
   const [fontSize, setFontSize] = useState(15);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  const [downloadIcon] = useState(<Download className="h-4 w-4" />);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("dksai.theme") as typeof theme;
@@ -839,12 +924,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <RootProvider>
-        <Outlet />
-        <SystemStatusBar />
-        <PerformanceMetricsWidget />
-        <FloatingActionButton />
-        <KeyboardShortcutsHint />
-        <Toaster richColors position="top-center" theme="dark" closeButton />
+        <TooltipProvider>
+          <Outlet />
+          <SystemStatusBar />
+          <PerformanceMetricsWidget />
+          <FloatingActionButton />
+          <KeyboardShortcutsHint />
+          <Toaster richColors position="top-center" theme="dark" closeButton />
+        </TooltipProvider>
       </RootProvider>
     </QueryClientProvider>
   );
